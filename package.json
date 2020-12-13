@@ -1,0 +1,33 @@
+{
+    "name": "statera-bot",
+    "version": "1.0.0",
+    "description": "D&D character progress tracking for westmarches",
+    "keywords": [
+        "dnd",
+        "d&d",
+        "westmarch",
+        "rpg",
+        "progress",
+        "discord",
+        "bot",
+        "character"
+    ],
+    "type": "module",
+    "license": "AGPL-3.0",
+    "repository": "github:a-h-i/progress-bot",
+    "scripts": {
+        "start": "node app.js"
+    },
+    "contributors": [
+        {
+            "name": "Ahmed H. Ismail"
+        }
+    ],
+    "dependencies": {
+        "discord.js": "^12.5.1",
+        "dotenv": "^8.2.0"
+    },
+    "devDependencies": {
+        "eslint": "^7.15.0"
+    }
+}
