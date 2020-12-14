@@ -16,7 +16,9 @@
     "license": "AGPL-3.0",
     "repository": "github:a-h-i/progress-bot",
     "scripts": {
-        "start": "node app.js"
+        "start": "NODE_ENV=production node app.js",
+        "dev": "NODE_ENV=development node app.js",
+        "test": "NODE_ENV=test mocha"
     },
     "contributors": [
         {
@@ -25,9 +27,16 @@
     ],
     "dependencies": {
         "discord.js": "^12.5.1",
-        "dotenv": "^8.2.0"
+        "dotenv": "^8.2.0",
+        "pg": "^8.5.1",
+        "pg-hstore": "^2.3.3",
+        "sequelize": "^6.3.5",
+        "sequelize-cli": "^6.2.0"
     },
     "devDependencies": {
-        "eslint": "^7.15.0"
+        "chai": "^4.2.0",
+        "eslint": "^7.15.0",
+        "mocha": "^8.2.1",
+        "sequelize-cli-esm": "^5.0.6"
     }
 }

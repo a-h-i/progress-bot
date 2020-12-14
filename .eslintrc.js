@@ -30,12 +30,26 @@ module.exports = {
             'error',
             '1tbs'
         ],
-        'no-unused-vars' : [
+        'no-unused-vars': [
             2,
             {
-                'args' : 'all',
+                'args': 'all',
                 'argsIgnorePattern': '^_',
                 'vars': 'all'
+            }
+        ],
+        'object-curly-spacing': [
+            'error',
+            'always'
+        ],
+        'array-bracket-spacing': [
+            'error',
+            'always'
+        ], 'comma-spacing': [
+            'error',
+            {
+                'before': false,
+                'after': true
             }
         ]
     }

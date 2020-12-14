@@ -1,12 +1,12 @@
 import { BaseCommand } from './base_command.js';
 import { MessageEmbed } from 'discord.js';
-import { PROJECT_HOME_PAGE, CAPITALIZED_BOT_NAME, EMBED_FOOTER_ARGS } from '../config/config.js';
+import { PROJECT_HOME_PAGE, CAPITALIZED_BOT_NAME, EMBED_FOOTER_ARGS, EMBED_COLOR } from '../config/index.js';
 const description = `Lists available commands.
 use help <command_name> to list help about a specific command`;
 
 class Help extends BaseCommand {
     constructor(){
-        super('help', description);
+        super('help', description, []);
     }
     
     execute(message, guildConfig) {
@@ -18,7 +18,7 @@ class Help extends BaseCommand {
             // Help with specific command
             const command = args[1].toLowerCase();
             if(message.client.commands.has(command)) {
-                return message.reply(message.client.commands.get(command).toString());
+                return message.reply(message.client.commands.get(command).createHelpEmbed());
             } else {
                 // unknown commands
                 return this.listCommands(message, guildConfig);
@@ -35,6 +35,7 @@ use ${guildConfig.prefix}help <command>`;
         helpEmbed.setDescription(embedDescription);
         helpEmbed.addField('Available commands', commandNames, false);
         helpEmbed.setFooter(...EMBED_FOOTER_ARGS);
+        helpEmbed.setColor(EMBED_COLOR);
         return message.reply(helpEmbed);
 
     }

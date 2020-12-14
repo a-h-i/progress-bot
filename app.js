@@ -1,9 +1,16 @@
-import * as Config from './config/config.js';
+import * as Config from './config/index.js';
 import * as Discord from 'discord.js';
 import * as Commands from './commands/index.js';
 import * as Models from './models/index.js';
 
-const client = new Discord.Client();
+const client = new Discord.Client({
+    presence: {
+        activity: {
+            type: Config.BOT_PRESENCE_ACTIVITY_TYPE,
+            name: Config.BOT_PRESENCE_ACTIVITY_NAME
+        }
+    }
+});
 client.commands = new Map();
 client.once('ready', () => {
     console.info('Client connected');
