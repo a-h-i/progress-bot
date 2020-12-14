@@ -24,8 +24,13 @@ The following environment variables are used by the application.
 
 |Key|Description|
 |:---:|:---:|
-|BOT_TOKEN | Bot token from discord developer portal|
-|DEFAULT_PREFIX| Default bot prefix|
-|EMBED_COLOR| Defaults to LUMINOUS_VIVID_PINK| 
+|STATERA_BOT_TOKEN | Bot token from discord developer portal|
+|STATERA_DEFAULT_PREFIX| Default bot prefix|
+|STATERA_EMBED_COLOR| Defaults to LUMINOUS_VIVID_PINK|
+|STATERA_BOT_ICON_URL| URL to statera bot Icon used in some messages|
+|STATERA_DB_HOST | Database host defaults to localhost|
+|STATERA_DB_PORT | Database port defaults to 5432|
+|STATERA_DB_PASSWORD| Database user password|
+|STATERA_DB_USERNAME| Database user defaults to statera_dev unless in production env|
 
 The program will autoload a .env file in the working directory at startup.
