@@ -1,3 +1,4 @@
+require('dotenv').config();
 module.exports = {};
 
 const DEFAULT_SETTINGS = {
@@ -5,7 +6,7 @@ const DEFAULT_SETTINGS = {
     host: process.env.STATERA_DB_HOST || '127.0.0.1',
     migrationStorageTableSchema: 'sequelize_schema',
     password: process.env.STATERA_DB_PASSWORD,
-    username: 'statera_dev',
+    username: process.env.STATERA_DB_USERNAME || 'statera_dev',
     port: process.env.STATERA_DB_PORT || '5432'
 };
 
@@ -14,6 +15,7 @@ module.exports.development.database = 'statera_dev_db';
 module.exports.test = Object.assign({}, DEFAULT_SETTINGS);
 module.exports.test.database = 'statera_test_db';
 module.exports.production = Object.assign({}, DEFAULT_SETTINGS);
+// Dissalow default DB user value in production
 module.exports.production.username = process.env.STATERA_DB_USERNAME;
 module.exports.production.database = process.env.STATERA_DB_NAME;
 
