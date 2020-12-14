@@ -25,7 +25,7 @@ class BaseCommand {
     /**
      * Executes the command
      * @param {Message} message - discord js message object See {@link https://discord.js.org/#/docs/main/stable/class/Message}
-     * @param {GuildConfig} _guildConfig - guild configuration
+     * @param {GuildConfig} [_guildConfig] - Guild configuration if available
      * @abstract
      * 
      */
@@ -35,11 +35,11 @@ class BaseCommand {
     /**
      * 
      * @param {Message} message - discord js message object See {@link https://discord.js.org/#/docs/main/stable/class/Message}
-     * @param {GuildConfig} guildConfig - guild configuration
+     * @param {string} prefix - guild configuration
      * @returns {Array} - array of arguments minus the prefix, might include command
      */
-    static argsArray(message, guildConfig) {
-        return message.content.slice(guildConfig.prefix).trim().split(/ +/);
+    static argsArray(message, prefix) {
+        return message.content.slice(prefix).trim().split(/ +/);
     }
 
     toString() {
