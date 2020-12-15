@@ -1,12 +1,12 @@
 import Sequelize from 'sequelize';
-import { DEFAULT_PREFIX } from '../config/index.js';
+import { DEFAULT_PREFIX, MAX_PREFIX_LENGTH } from '../config/index.js';
 
 /**
  * A configuration model for a specific guild
  * 
  */
 class GuildConfig extends Sequelize.Model {
-
+    
 
     static initialize(sequelize) {
         // Note that roles json is an object for lookup optimization
@@ -17,7 +17,7 @@ class GuildConfig extends Sequelize.Model {
                 allowNull: false,
             },
             prefix: {
-                type: Sequelize.DataTypes.STRING(64),
+                type: Sequelize.DataTypes.STRING(MAX_PREFIX_LENGTH),
                 allowNull: false,
                 defaultValue: DEFAULT_PREFIX,
             },
@@ -69,6 +69,17 @@ class GuildConfig extends Sequelize.Model {
             }
         });
 
+    }
+
+    
+    /**
+     * Checks if a string can be used as a prefix
+     * @param {string} prefix - string to be checked
+     * @returns {boolean} true if it is valid otherwise false
+     */
+    static isValidPreixString(prefix) {
+        let regex = /^\S+$/;
+        return  prefix.length <= MAX_PREFIX_LENGTH && regex.test(prefix);
     }
 }
 

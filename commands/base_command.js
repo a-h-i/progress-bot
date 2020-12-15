@@ -33,13 +33,13 @@ class BaseCommand {
         throw new Error('Unimplemented execute method. Message: ' + JSON.stringify(message));
     }
     /**
-     * 
+     * Does not check if prefix exists.
      * @param {Message} message - discord js message object See {@link https://discord.js.org/#/docs/main/stable/class/Message}
      * @param {string} prefix - guild configuration
      * @returns {Array} - array of arguments minus the prefix, might include command
      */
     static argsArray(message, prefix) {
-        return message.content.slice(prefix).trim().split(/ +/);
+        return message.content.slice(prefix.length).trim().split(/ +/);
     }
 
     toString() {

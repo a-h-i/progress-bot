@@ -16,6 +16,7 @@ class CommandHandler {
 
     /**
      * Handles a message
+     * Sets message.argsArray to array of arguments as returned from BaseCommand.argsArray {@link BaseCommand#argsArray}
      * @param {Discord::Message} message - see {@link https://discord.js.org/#/docs/main/stable/class/Message} 
      */
     async handleMessage(message) {
@@ -36,8 +37,9 @@ class CommandHandler {
                 }
             );
             if (!message.content.startsWith(guildConfig.prefix)) return;
-            const argsArray = BaseCommand.argsArray(message, guildConfig.prefix);
-            const command = (argsArray.shift() || 'help').toLowerCase();
+            message.argsArray = BaseCommand.argsArray(message, guildConfig.prefix);
+            
+            const command = (message.argsArray.shift() || 'help').toLowerCase();
             if (this.commands.has(command)) {
                 return this.commands.get(command).execute(message, guildConfig);
             } else {

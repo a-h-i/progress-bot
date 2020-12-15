@@ -1,4 +1,7 @@
 import { BaseCommand } from './base_command.js';
+import * as BotConfig from '../config/index.js';
+import { GuildConfig } from '../models/index.js';
+
 const description = `Configure the bot for your own server.
 Call with no arguments for interactive mode.
 Note that arguments that use mentions can **not** be combined in the same message.
@@ -97,6 +100,105 @@ class Config extends BaseCommand {
         ];
         super('config', description, args);
     }
+
+    execute(message, guildConfig) {
+        if (message.argsArray.length == 0) {
+            return this.interactiveConfig(message, guildConfig);
+        }
+    }
+
+    async interactiveConfig(message, guildConfig) {        
+        try {
+            const states = [
+                this.interactiveModePrefix,
+                this.interactiveModeStartingLevel,
+                this.interactiveModeStartingGold,
+                this.interactiveModeForumulas,
+                this.interactiveModeCharCreationRoles,
+                this.interactiveModeRewardRoles,
+                this.interactiveModeConfigRoles
+            ];
+            
+            let success = true;
+
+            for (let i = 0; i < states.length && success ; i++) {
+                success = await states[i].call(this, message, guildConfig);
+            }
+
+            if (success) {
+                await guildConfig.save();
+                return message.reply('Configuration saved!');
+            } else {
+                return message.reply('Configuration canceled, changes not saved.');
+            }
+            
+
+        } catch (err) {
+            console.error('Error handling interactive config');
+            console.error(err);
+            throw err;
+        }
+        
+    }
+
+    async interactiveModePrefix(message, guildConfig) {
+        const prompt = `Please enter a prefix to be used by the bot. A prefix can have a max of ${BotConfig.MAX_PREFIX_LENGTH} characters
+Current prefix is: ${guildConfig.prefix}
+Prefix can contain symbols, but not spaces and is case insensitive.
+Reply with c to cancel the entire process.
+Reply with s to skip this setting, keeping the current value.
+        `;
+        await message.reply(prompt);
+        const filter = reply => reply.author.id == message.author.id;
+        return message.channel.awaitMessages(filter, {
+            max: 1,
+            time: BotConfig.INTERACTIVE_DEFAULT_TIMEOUT,
+            errors: [ 'time' ]
+        }).then( collected => {
+            let prefix = collected.first().content.trim().toLowerCase();
+            if (prefix === 'c') {
+                // cancled process;
+                return false;
+            } else if (prefix === 's') {
+                // skipped step.
+                return true;
+            }
+            if (GuildConfig.isValidPreixString(prefix)) {
+                guildConfig.prefix = prefix;
+                return true;
+            } else {
+                return false;
+            }
+        }).catch( () => {
+            return false; 
+        });
+
+    }
+
+    async interactiveModeStartingLevel(_message, _guildConfig) {
+        return true;
+    }
+
+    async interactiveModeStartingGold(_message, _guildConfig) {
+        return true;
+    }
+    async interactiveModeForumulas(_message, _guildConfig) {
+        return true;
+    }
+    async interactiveModeCharCreationRoles(_message, _guildConfig) {
+        return true;
+    }
+    async interactiveModeRewardRoles(_message, _guildConfig) {
+        return true;
+    }
+    async interactiveModeConfigRoles(_message, _guildConfig) {
+        return true;
+    }
+
+
+
+
+    
 }
 
 export { Config };
