@@ -45,10 +45,17 @@ module.exports = {
         'array-bracket-spacing': [
             'error',
             'always'
-        ], 'comma-spacing': [
+        ],
+        'comma-spacing': [
             'error',
             {
                 'before': false,
+                'after': true
+            }
+        ], 'keyword-spacing' : [
+            'error',
+            {
+                'before': true,
                 'after': true
             }
         ]

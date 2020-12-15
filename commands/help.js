@@ -15,14 +15,14 @@ class Help extends BaseCommand {
         
 
         const args = BaseCommand.argsArray(message, guildConfig.prefix);
-        if(args.length <= 1) {
+        if (args.length <= 1) {
             // List commands
             return this.listCommands(message, guildConfig);
         } else {
             // Help with specific command
             const command = args[1].toLowerCase();
-            if(message.client.commands.has(command)) {
-                return message.reply(message.client.commands.get(command).createHelpEmbed());
+            if (message.client.commandsHandler.has(command)) {
+                return message.reply(message.client.commandsHandler.get(command).createHelpEmbed());
             } else {
                 // unknown commands
                 return this.listCommands(message, guildConfig);
@@ -31,9 +31,10 @@ class Help extends BaseCommand {
     }
 
     listCommands(message, guildConfig) {
-        const commandNames = [ ...message.client.commands.keys() ].join('\n');
+        const commandNames = [ ...message.client.commandsHandler.commandNames() ].join('\n');
         const helpEmbed = new MessageEmbed();
         helpEmbed.setTitle(`${Config.CAPITALIZED_BOT_NAME} Bot`).setURL(Config.PROJECT_HOME_PAGE);
+        helpEmbed.setThumbnail(Config.BOT_ICON_URL);
         const embedDescription = `For help with a specific command
 use ${guildConfig.prefix}help <command>`;
         helpEmbed.setDescription(embedDescription);

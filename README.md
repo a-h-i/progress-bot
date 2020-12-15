@@ -13,6 +13,13 @@ PostgreSQL v12.4 or later
 
 To install node dependencies run `npm install` in root directory.
 
+## Database
+
+To create the database, if it hasn't been created before. Run `npx sequelize-cli db:create` to create a production environment DB set the env variable `NODE_ENV=production`.
+
+
+To run the database migration in the root folder of the project run `npx sequelize-cli db:migrate`. To migrate in production also set `NODE_ENV=production`
+
 
 ## Runing the project
 To run in production env use `npm run start` to run in development mode use `npm run dev`.

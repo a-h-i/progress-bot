@@ -1,5 +1,5 @@
 import { MessageEmbed } from 'discord.js';
-import { EMBED_FOOTER_ARGS, EMBED_COLOR } from '../config/index.js';
+import * as Config from '../config/index.js';
 /**
  * A base class for bot commands
  * 
@@ -52,12 +52,13 @@ class BaseCommand {
      */
     createHelpEmbed() {
         const embed = new MessageEmbed();
-        embed.setTitle(`${this.name} command usage`).setColor(EMBED_COLOR);
+        embed.setTitle(`${this.name} command usage`).setColor(Config.EMBED_COLOR)
+            .setThumbnail(Config.BOT_ICON_URL);
         embed.setDescription(this.description);
-        for(let argument of this.commandArguments) {
+        for (let argument of this.commandArguments) {
             embed.addField(argument.title, argument.description, false);
         }
-        embed.setTimestamp().setFooter(...EMBED_FOOTER_ARGS);
+        embed.setTimestamp().setFooter(...Config.EMBED_FOOTER_ARGS);
         return embed;
     }
 }

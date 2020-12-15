@@ -75,8 +75,24 @@ class Config extends BaseCommand {
             },
             {
                 name: '--reward-remove-roles',
-                description: '--reward-remove-role <@Role1> <@Role2> ... <@Role3> : Removes the mentioned roles from the list',
+                description: '--reward-remove-roles <@Role1> <@Role2> ... <@Role3> : Removes the mentioned roles from the list',
                 title: 'Remove reward roles'
+            },
+            {
+                name: '--config-add-roles',
+                description: '--config-add-roles <@Role1> ... <@RoleN> : Allows the mentioned roles to change bot configuration',
+                title: 'Config Roles'
+            },
+            {
+                name: '--config-list-roles',
+                description: '--config-list-roles : List roles',
+                title: 'List config roles'
+            },
+            {
+                name: '--config-remove-roles',
+                description: '--config-remove-roles <@Role1> ... <@RoleN> : Remove roles',
+                title: 'Config remove roles'
+                
             }
         ];
         super('config', description, args);
