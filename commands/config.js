@@ -6,6 +6,9 @@ const description = `Configure the bot for your own server.
 Call with no arguments for interactive mode.
 Note that arguments that use mentions can **not** be combined in the same message.
 `;
+// Max retry for valid input in interactive mode config.
+const MAX_RETRY_COUNT = 3;
+
 /**
  * configure the bot for your own server
  * call with no arguments for interactive mode
@@ -25,7 +28,6 @@ Note that arguments that use mentions can **not** be combined in the same messag
  * Note: 
  * Arguments that use mentions can not be combined in the same message.
  */
-
 class Config extends BaseCommand {
     constructor() {
         const args = [
@@ -113,7 +115,6 @@ class Config extends BaseCommand {
                 this.interactiveModePrefix,
                 this.interactiveModeStartingLevel,
                 this.interactiveModeStartingGold,
-                this.interactiveModeForumulas,
                 this.interactiveModeCharCreationRoles,
                 this.interactiveModeRewardRoles,
                 this.interactiveModeConfigRoles
@@ -141,27 +142,27 @@ class Config extends BaseCommand {
         
     }
 
+
     async interactiveModePrefix(message, guildConfig) {
-        const prompt = `Please enter a prefix to be used by the bot. A prefix can have a max of ${BotConfig.MAX_PREFIX_LENGTH} characters
+        const prompt = `Plpillars of eternity 2 oswald bugease enter a prefix to be used by the bot. A prefix can have a max of ${BotConfig.MAX_PREFIX_LENGTH} characters
 Current prefix is: ${guildConfig.prefix}
 Prefix can contain symbols, but not spaces and is case insensitive.
 Reply with c to cancel the entire process.
-Reply with s to skip this setting, keeping the current value.
-        `;
-        await message.reply(prompt);
+Reply with s to skip this setting, keeping the current value.`;
+        const promptMessage = await message.reply(prompt);
         const filter = reply => reply.author.id == message.author.id;
         return message.channel.awaitMessages(filter, {
             max: 1,
             time: BotConfig.INTERACTIVE_DEFAULT_TIMEOUT,
             errors: [ 'time' ]
         }).then( collected => {
-            let prefix = collected.first().content.trim().toLowerCase();
+            const prefix = collected.first().content.trim().toLowerCase();
             if (prefix === 'c') {
                 // cancled process;
                 return false;
             } else if (prefix === 's') {
                 // skipped step.
-                return true;
+                return message.reply('Skipping setting.').then( () => true);
             }
             if (GuildConfig.isValidPreixString(prefix)) {
                 guildConfig.prefix = prefix;
@@ -169,24 +170,133 @@ Reply with s to skip this setting, keeping the current value.
             } else {
                 return false;
             }
-        }).catch( () => {
+        }).catch( async () => {
+            await promptMessage.edit('Response timed out');
             return false; 
         });
 
     }
 
-    async interactiveModeStartingLevel(_message, _guildConfig) {
+    async interactiveModeStartingLevel(message, guildConfig) {
+        const prompt = `Please enter a starting level. A starting level must be in the range [1, 20].
+The current starting level is ${guildConfig.startingLevel}.
+Reply with c to cancel the entire process.
+Reply with s to skip this setting, keeping the current value.`;
+        const replyContentRegex = /^([cs]|\d{1,2})$/i;
+        const filter = (reply) => {
+            return reply.author.id == message.author.id && replyContentRegex.test(reply.content.trim());
+        };
+        let retryCount = 0;
+        do {
+            const promptMessage = await message.reply(prompt);
+            const collected = await message.channel.awaitMessages(filter, {
+                max: 1,
+                time: BotConfig.INTERACTIVE_DEFAULT_TIMEOUT
+            });
+            if (collected.size == 0) {
+                // time elapsed before user reply
+                await promptMessage.edit('Response timed out');
+                return false;
+            }
+            let level = collected.first().content.trim().toLowerCase();
+            if (level === 'c') {
+                // canceled
+                return false;
+            } else if (level === 's') {
+                // skipped
+                break;
+            }
+            level = parseInt(level, 10);
+            level = parseInt(level, 10);
+            if (GuildConfig.isValidStartingLevel(level)) {
+                guildConfig.startingLevel = level;
+                return true;
+            } else {
+                await message.reply('Value must be between 1-20.');
+                retryCount++;
+            }
+        } while (retryCount < MAX_RETRY_COUNT);
+        // Max retry count reached and no valid value entered.
+        await message.reply('Skipping setting.');
         return true;
     }
 
-    async interactiveModeStartingGold(_message, _guildConfig) {
+    async interactiveModeStartingGold(message, guildConfig) {
+        const prompt = `Please enter starting gold value. Value must be positive. Decimals are accepted
+The current starting gold value is ${guildConfig.startingGold}
+Reply with c to cancel the entire process.
+Reply with s to skip this setting, keeping the current value.`;
+        const filterRegex = /^([cs]|(\d*\.?\d*))$/i;
+        const filter = (reply) => reply.author.id == message.author.id && filterRegex.test(reply.content.trim());
+        let retryCount = 0;
+        do {
+            const promptMessage = await message.reply(prompt);
+            const collected = await message.channel.awaitMessages(filter, {
+                max: 1,
+                time: BotConfig.INTERACTIVE_DEFAULT_TIMEOUT
+            });
+            if (collected.size == 0) {
+                // time elapsed before user reply
+                await promptMessage.edit('Response timed out');
+                return false;
+            }
+            let gold = collected.first().content.trim().toLowerCase();
+            if (gold === 'c') {
+                // canceled
+                return false;
+            } else if (gold === 's') {
+                // skipped
+                break;
+            }
+            gold = parseFloat(gold);
+            if (GuildConfig.isValidStartingGold(gold)) {
+                guildConfig.startingGold = gold;
+                return true;
+            } else {
+                await message.reply('Value must be valid positive decimal.');
+                retryCount++;
+            }
+        } while (retryCount < MAX_RETRY_COUNT);
+        // Max retry count reached and no valid value entered.
+        await message.reply('Skipping setting.');
         return true;
     }
-    async interactiveModeForumulas(_message, _guildConfig) {
-        return true;
+    
+
+
+
+    async roleInteractiveHelper(message, guildConfig, prompt, attributeName) {
+        const promptMessage = await message.reply(prompt);
+        const filter = (reply) => {
+            return reply;
+        };
+        const collected = await message.channel.awaitMessages(filter, {
+            max: 1,
+            time: BotConfig.INTERACTIVE_DEFAULT_TIMEOUT
+        });
+        if (collected.size == 0) {
+            // time elapsed before user reply
+            await promptMessage.edit('Response timed out');
+            return false;
+        }
+        const reply = collected.first();
+        const content = reply.content.trim().toLowerCase().charAt(0);
+
+        if (reply.mentions.roles.size != 0) {
+            return false;
+        } else if (content === 'c') {
+            // canceled
+            return false;
+        } else if (content === 's') {
+            // skipped
+            return true;
+        }
     }
-    async interactiveModeCharCreationRoles(_message, _guildConfig) {
-        return true;
+    async interactiveModeCharCreationRoles(message, guildConfig) {
+        const prompt = `Please mention the roles you want to have permission to character creation.
+Note that setting it this way will replace the current list.
+reply with c to cancel or s to skip.`;
+        return this.roleInteractiveHelper(message, guildConfig, prompt, 'charCreationRoles');
     }
     async interactiveModeRewardRoles(_message, _guildConfig) {
         return true;

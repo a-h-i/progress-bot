@@ -12,7 +12,7 @@ const EMBED_COLOR = process.env.STATERA_EMBED_COLOR || 'LUMINOUS_VIVID_PINK';
 const ISSUES_URL = 'https://github.com/a-h-i/progress-bot/issues';
 const DM_REWARDS_WIKI_URL = 'https://github.com/a-h-i/progress-bot/wiki/DM-Rewards';
 const BOT_ICON_URL = process.env.STATERA_BOT_ICON_URL || 'https://i.imgur.com/IPjZGrv.png';
-const INTERACTIVE_DEFAULT_TIMEOUT = 10000;
+const INTERACTIVE_DEFAULT_TIMEOUT = 30000;
 const MAX_PREFIX_LENGTH = 64;
 /**
  * Must be one of {@link https://discord.js.org/#/docs/main/stable/typedef/ActivityType ActivityType}

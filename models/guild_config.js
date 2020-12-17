@@ -78,8 +78,22 @@ class GuildConfig extends Sequelize.Model {
      * @returns {boolean} true if it is valid otherwise false
      */
     static isValidPreixString(prefix) {
-        let regex = /^\S+$/;
+        const regex = /^\S+$/;
         return  prefix.length <= MAX_PREFIX_LENGTH && regex.test(prefix);
+    }
+
+
+    static isValidStartingLevel(level) {
+        return level >= 1 && level <= 20;
+    }
+
+    /**
+     * 
+     * @param {float} gold
+     * @returns {boolean} true if valid number
+     */
+    static isValidStartingGold(gold) {
+        return gold >= 0;
     }
 }
 

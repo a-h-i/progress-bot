@@ -14,12 +14,12 @@ class Help extends BaseCommand {
     execute(message, guildConfig) {
         
 
-        if (message.argsArray.length <= 1) {
+        if (message.argsArray.length == 0) {
             // List commands
             return this.listCommands(message, guildConfig);
         } else {
             // Help with specific command
-            const command = message.argsArray[1].toLowerCase();
+            const command = message.argsArray[0].toLowerCase();
             if (message.client.commandsHandler.has(command)) {
                 return message.reply(message.client.commandsHandler.get(command).createHelpEmbed());
             } else {
