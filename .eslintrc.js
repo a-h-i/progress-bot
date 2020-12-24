@@ -58,6 +58,9 @@ module.exports = {
                 'before': true,
                 'after': true
             }
+        ],
+        'no-prototype-builtins' : [
+            'off'
         ]
     }
 };

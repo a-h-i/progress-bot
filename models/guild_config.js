@@ -95,6 +95,59 @@ class GuildConfig extends Sequelize.Model {
     static isValidStartingGold(gold) {
         return gold >= 0;
     }
+
+    /**
+     * 
+     * @param {string[]} roles - role ids. 
+     */
+    setCharCreationRoles(roles) {
+        this.setRoleHelper('charCreationRoles', roles); 
+    }
+
+    setRewardRoles(roles) {
+        this.setRoleHelper('rewardRoles', roles);
+    }
+
+    setConfigRoles(roles) {
+        this.setRoleHelper('configurationRoles', roles);
+    }
+
+    /**
+     * 
+     * @param {string} attribute - attribute name
+     * @param {string[]} roles - role ids
+     */
+    setRoleHelper(attribute, roles) {
+        let valueObject = {};
+        roles.forEach((id) => valueObject[id] = id);
+        this.set(attribute, valueObject);
+    }
+
+    /**
+     * @returns {string[]} array of role ids
+     */
+    getConfigRoles() {
+        return this.getRolesHelper('configurationRoles');
+    }
+
+    /**
+     * @returns {string[]} array of role ids
+     */
+    getRewardRoles() {
+        return this.getRolesHelper('rewardRoles');
+    }
+
+    /**
+     * @returns {string[]} array of role ids
+     */
+    getCharCreationRoles() {
+        return this.getRolesHelper('charCreationRoles');
+    }
+
+    getRolesHelper(attribute) {
+        return Object.getOwnPropertyNames(this.get(attribute));
+    }
+
 }
 
 

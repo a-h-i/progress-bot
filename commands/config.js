@@ -1,6 +1,7 @@
 import { BaseCommand } from './base_command.js';
 import * as BotConfig from '../config/index.js';
 import { GuildConfig } from '../models/index.js';
+import { MessageEmbed } from 'discord.js';
 
 const description = `Configure the bot for your own server.
 Call with no arguments for interactive mode.
@@ -34,7 +35,8 @@ class Config extends BaseCommand {
             {
                 name: '--list',
                 description: 'if present simply lists the current configuration',
-                title: 'List configuration'
+                title: 'List configuration',
+                handle: Config.prototype.handleListSubCommand
             },
             {
                 name: '--prefix',
@@ -100,6 +102,12 @@ class Config extends BaseCommand {
                 
             }
         ];
+        // TODO: remove after complete implementation of subcommands
+        args.forEach((arg) => {
+            if (!arg.hasOwnProperty('handler')) {
+                arg.handler = () => true;
+            }
+        });
         super('config', description, args);
     }
 
@@ -107,6 +115,15 @@ class Config extends BaseCommand {
         if (message.argsArray.length == 0) {
             return this.interactiveConfig(message, guildConfig);
         }
+        const subCommand = message.argsArray.shift().toLowerCase();
+        for (const arg of this.commandArguments) {
+            if (arg.name === subCommand) {
+                return arg.handle.call(this, message, guildConfig);
+            }
+        }
+        // invalid usage
+        return message.reply(this.createHelpEmbed());
+
     }
 
     async interactiveConfig(message, guildConfig) {        
@@ -144,7 +161,7 @@ class Config extends BaseCommand {
 
 
     async interactiveModePrefix(message, guildConfig) {
-        const prompt = `Plpillars of eternity 2 oswald bugease enter a prefix to be used by the bot. A prefix can have a max of ${BotConfig.MAX_PREFIX_LENGTH} characters
+        const prompt = `Please enter a prefix to be used by the bot. A prefix can have a max of ${BotConfig.MAX_PREFIX_LENGTH} characters
 Current prefix is: ${guildConfig.prefix}
 Prefix can contain symbols, but not spaces and is case insensitive.
 Reply with c to cancel the entire process.
@@ -264,11 +281,16 @@ Reply with s to skip this setting, keeping the current value.`;
     
 
 
-
-    async roleInteractiveHelper(message, guildConfig, prompt, attributeName) {
+    /**
+     * Helper function for displaying a prompt and then collecting roles.
+     * @param {discordjs::Message} message 
+     * @param {string} prompt - user prompt
+     * @param {function} handler - called with array containing role ids, empty array if none.
+     */
+    async roleInteractiveHelper(message, prompt, handler) {
         const promptMessage = await message.reply(prompt);
         const filter = (reply) => {
-            return reply;
+            return reply.author.id == message.author.id;
         };
         const collected = await message.channel.awaitMessages(filter, {
             max: 1,
@@ -281,32 +303,98 @@ Reply with s to skip this setting, keeping the current value.`;
         }
         const reply = collected.first();
         const content = reply.content.trim().toLowerCase().charAt(0);
-
-        if (reply.mentions.roles.size != 0) {
-            return false;
-        } else if (content === 'c') {
+        if (content === 'c') {
             // canceled
             return false;
         } else if (content === 's') {
             // skipped
             return true;
+        } else {
+            const roleIds = [ ...reply.mentions.roles.values() ].map((role) => role.id);
+            handler(roleIds);
+            return true;
         }
     }
+
+
     async interactiveModeCharCreationRoles(message, guildConfig) {
-        const prompt = `Please mention the roles you want to have permission to character creation.
+        const prompt = `Please mention the roles you want to have permission to character creation commands.
 Note that setting it this way will replace the current list.
 reply with c to cancel or s to skip.`;
-        return this.roleInteractiveHelper(message, guildConfig, prompt, 'charCreationRoles');
+        const handler = guildConfig.setCharCreationRoles.bind(guildConfig);
+        return this.roleInteractiveHelper(message, prompt, handler);
     }
-    async interactiveModeRewardRoles(_message, _guildConfig) {
-        return true;
-    }
-    async interactiveModeConfigRoles(_message, _guildConfig) {
-        return true;
+    async interactiveModeRewardRoles(message, guildConfig) {
+        const prompt = `Please mention the roles you want to have permission to reward commands.
+Note that setting it this way will replace the current list.
+reply with c to cancel or s to skip.`;
+        const handler = guildConfig.setRewardRoles.bind(guildConfig);
+        return this.roleInteractiveHelper(message, prompt, handler);
+
     }
 
+    async interactiveModeConfigRoles(message, guildConfig) {
+        const prompt = `Please mention the roles you want to have permission to configuration commands.
+Note that setting it this way will replace the current list.
+reply with c to cancel or s to skip.`;
+        const handler = guildConfig.setConfigRoles.bind(guildConfig);
+        return this.roleInteractiveHelper(message, prompt, handler);
+    }
 
+    /**
+     * 
+     * @param {discordjs.Message} message 
+     * @param {Models.GuildConfig} guildConfig 
+     */
+    async handleListSubCommand(message, guildConfig) {
+        const configEmbed = new MessageEmbed();
+        configEmbed.setTitle('Current Guild Settings');
+        configEmbed.setThumbnail(BotConfig.BOT_ICON_URL);
+        configEmbed.setAuthor(BotConfig.CAPITALIZED_BOT_NAME, BotConfig.BOT_ICON_URL, BotConfig.PROJECT_HOME_PAGE);
+        const startingValueField = {
+            name: 'Prefix and Starting Values',
+            inline: false
+        };
+        startingValueField.value = `Prefix: ${guildConfig.prefix}
+Starting Level: ${guildConfig.startingLevel}
+Starting Gold: ${guildConfig.startingGold}`;
+        
+        const fields = [ startingValueField ];
+        const creationRoles = this.roleIdsToNamesHelper(guildConfig.getCharCreationRoles(), message.guild.roles);
 
+        fields.push({
+            name: 'Character Creation Roles',
+            inline: true,
+            value: creationRoles
+        });
+
+        const rewardRoles = this.roleIdsToNamesHelper(guildConfig.getRewardRoles(), message.guild.roles);
+        fields.push({
+            name: 'Reward Roles',
+            inline: true,
+            value: rewardRoles
+        });
+        const configRoles = this.roleIdsToNamesHelper(guildConfig.getConfigRoles(), message.guild.roles);
+        fields.push({
+            name: 'Configuration Roles',
+            inline: true,
+            value: configRoles
+        });
+
+        configEmbed.addFields(...fields);
+        configEmbed.setFooter(...BotConfig.EMBED_FOOTER_ARGS);
+        configEmbed.setColor(BotConfig.EMBED_COLOR);
+        return message.reply(configEmbed);
+    }
+
+    /**
+     * @param {string[]} ids - role ids
+     * @param {discrodjs.RoleManager} roleManager 
+     * @returns {string} comma seperated string of role names
+     */
+    roleIdsToNamesHelper(ids, roleManager) {
+        return ids.map((id) => roleManager.cache.get(id).name).join(', ');
+    }
 
     
 }
