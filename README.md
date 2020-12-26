@@ -1,6 +1,6 @@
 Statera
 =======
-[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0) [![buddy pipeline](https://app.buddy.works/ahi-ci/progress-bot/pipelines/pipeline/298937/badge.svg?token=dadcd2a6ab0b5e00f214201cc11d9d64842b85d87772a5b88837873741c199cd "buddy pipeline")](https://app.buddy.works/ahi-ci/progress-bot/pipelines/pipeline/298937)
 
 A simple bot for managing and tracking D&D character progression in westmarch servers.
 

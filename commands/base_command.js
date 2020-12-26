@@ -1,5 +1,10 @@
 import { MessageEmbed } from 'discord.js';
 import * as Config from '../config/index.js';
+
+const LEAD_TRAIL_QUOTES_REGEX = /(^['"])|(['"]$)/g;
+
+
+
 /**
  * A base class for bot commands
  * 
@@ -78,6 +83,14 @@ class BaseCommand {
     
     standardNotAllowedMessage(message) {
         return message.reply('Sorry you are not allowed to use this command.');
+    }
+    /**
+     * Removes leading and trailing single or double quotes from str
+     * @param {string} str 
+     * @returns {string} new string
+     */
+    static removeLeadingAndTrailingQuoutes(str) {
+        return str.replace(LEAD_TRAIL_QUOTES_REGEX, '');
     }
 }
 

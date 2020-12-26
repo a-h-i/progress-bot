@@ -61,7 +61,11 @@ describe('Character', function() {
         });
 
         afterEach(async function() {
-            await Character.destroy({ truncate: true, cascade: true });
+            await Character.destroy({
+                where: {
+                    guildId: guildId
+                }
+            });
         });
         
 
@@ -128,7 +132,89 @@ describe('Character', function() {
                 userId: userId,
                 isActive: true
             } });
-            activeChar.name.should.equal(charNames[0]);
+            return activeChar.name.should.equal(charNames[0]);
+        });
+    });
+
+    describe('setActive', function() {
+        let characters = [];
+        const userId = 'test:character:user02';
+        before(async function () {
+            const transaction = await sequelize.transaction();
+            const guildConfig = await GuildConfig.create({
+                id: 'test:character:guild02',
+                startingLevel: 3,
+                startingGold: 300
+            }, {
+                transaction: transaction
+            });
+            characters.push(await Character.registerNewCharacter(guildConfig.id,
+                userId, 'Character 1', guildConfig.startingLevel, guildConfig.startingGold, transaction));
+            characters.push(await Character.registerNewCharacter(guildConfig.id,
+                userId, 'Character 2', guildConfig.startingLevel, guildConfig.startingGold, transaction));
+            characters.push(await Character.registerNewCharacter(guildConfig.id,
+                userId, 'Character 3', guildConfig.startingLevel, guildConfig.startingGold, transaction));
+            await transaction.commit();
+        });
+
+        it('Changes active character', async function() {
+            characters.length.should.be.greaterThan(1);
+            const priorActiveCharacter = await Character.findOne({
+                where: {
+                    guildId: characters[0].guildId,
+                    userId: characters[0].userId,
+                    isActive: true
+                } 
+            });
+            priorActiveCharacter.name.should.equal(characters[0].name);
+            const returnValue = await Character.setActive(characters[0].guildId, 
+                userId, characters[characters.length - 1].name);
+            returnValue.should.be.instanceOf(Character);
+            returnValue.isActive.should.be.true;
+            returnValue.name.should.equal(characters[characters.length - 1].name);
+            const activeCount = await Character.count({
+                where: {
+                    guildId: characters[0].guildId,
+                    userId: characters[0].userId,
+                    isActive: true
+                }
+            });
+            activeCount.should.equal(1);
+        });
+
+        it('Should not change active character when invalid name given', async function() {
+            const priorActiveCharacter = await Character.findOne({
+                where: {
+                    guildId: characters[0].guildId,
+                    userId: characters[0].userId,
+                    isActive: true
+                } 
+            });
+
+            const returnValue = await Character.setActive(characters[0].guildId, 
+                userId, characters.join('-'));
+            // eslint-disable-next-line no-undef
+            expect(returnValue).to.be.null;
+            const postActiveCharacter = await Character.findOne({
+                where: {
+                    guildId: characters[0].guildId,
+                    userId: characters[0].userId,
+                    isActive: true
+                } 
+            });
+            postActiveCharacter.name.should.equal(priorActiveCharacter.name);
+            const activeCount = await Character.count({
+                where: {
+                    guildId: characters[0].guildId,
+                    userId: characters[0].userId,
+                    isActive: true
+                }
+            });
+            activeCount.should.equal(1);
+        });
+
+        after(async function() {
+            await GuildConfig.destroy({ truncate: true, cascade: true });
         });
     });
 });

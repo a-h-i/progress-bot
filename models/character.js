@@ -127,19 +127,11 @@ class Character extends Sequelize.Model {
      * @param {string} userId 
      * @param {string} name 
      * @param {Sequelize.Transaction} [transaction]
+     * @returns {Promise<Character>} Instance of updated character or null if no match found.
      */
     static async setActive(guildId, userId, name, transaction) {
-        await Character.update({
-            isActive: false,
-        }, {
-            where: {
-                isActive: true,
-                guildId: guildId,
-                userId: userId
-            },
-            transaction: transaction
-        });
-        return Character.update({
+        
+        const updateResult = await Character.update({
             isActive: true
         }, { 
             where:{
@@ -148,8 +140,25 @@ class Character extends Sequelize.Model {
                 name: name,
                 isRetired: false
             }, 
-            transaction: transaction 
+            transaction: transaction,
+            returning: true
         });
+        if (updateResult[0] != 0) {
+            await Character.update({
+                isActive: false,
+            }, {
+                where: {
+                    isActive: true,
+                    guildId: guildId,
+                    userId: userId,
+                    name: {
+                        [Sequelize.Op.ne] : name
+                    }
+                },
+                transaction: transaction
+            });
+        }
+        return updateResult[0] == 0 ? null : updateResult[1][0];
     }
     /**
      * Updates underlying storage
@@ -259,6 +268,7 @@ class Character extends Sequelize.Model {
         }
     }
 
+
     /**
      * Updates level based on experience field.
      * Does not update underlying storage.
@@ -275,7 +285,7 @@ class Character extends Sequelize.Model {
     }
 
     toString() {
-        return `${this.name} Level: ${this.level} Experience: ${this.experience} Gold: ${this.gold} ${this.isActive? '- Active' : ''} ${this.isRetired? ' - Retired' : ''}`;
+        return `${this.name} Level: ${this.level} Experience: ${this.experience} Gold: ${this.gold} ${this.isActive? '- **Active**' : ''} ${this.isRetired? ' - **Retired**' : ''}`;
     }
 }
 

@@ -87,9 +87,7 @@ class Register extends BaseCommand {
 
         // transform charname to string
         charName = charName.join(' ');
-        // remove leading and trailing single or double quotes
-        const charNameRegex = /(^['"])|(['"]$)/g;
-        charName = charName.replace(charNameRegex, '').trim();
+        charName = BaseCommand.removeLeadingAndTrailingQuoutes(charName).trim();
         if (charName.length == 0) {
             logger.notice('Parsed empty char name');
             return message.reply('Invalid character name.');
