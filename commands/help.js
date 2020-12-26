@@ -38,6 +38,7 @@ class Help extends BaseCommand {
 use ${guildConfig.prefix}help <command>`;
         helpEmbed.setDescription(embedDescription);
         helpEmbed.addField('Available commands', commandNames, false);
+        helpEmbed.setTimestamp();
         helpEmbed.setFooter(...Config.EMBED_FOOTER_ARGS);
         helpEmbed.setColor(Config.EMBED_COLOR);
         return message.reply(helpEmbed);

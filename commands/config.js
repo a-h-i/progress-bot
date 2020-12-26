@@ -2,6 +2,7 @@ import { BaseCommand } from './base_command.js';
 import * as BotConfig from '../config/index.js';
 import { GuildConfig } from '../models/index.js';
 import { MessageEmbed } from 'discord.js';
+const logger = BotConfig.logger;
 
 const description = `Configure the bot for your own server.
 Call with no arguments for interactive mode.
@@ -112,6 +113,10 @@ class Config extends BaseCommand {
     }
 
     execute(message, guildConfig) {
+        if (!this.hasPermission(message.member, guildConfig.getConfigRolesAsMap())) {
+            // Not allowed
+            return this.standardNotAllowedMessage(message);
+        }
         if (message.argsArray.length == 0) {
             return this.interactiveConfig(message, guildConfig);
         }
@@ -152,8 +157,7 @@ class Config extends BaseCommand {
             
 
         } catch (err) {
-            console.error('Error handling interactive config');
-            console.error(err);
+            logger.error('Error handling interactive config', err);
             throw err;
         }
         
@@ -382,6 +386,7 @@ Starting Gold: ${guildConfig.startingGold}`;
         });
 
         configEmbed.addFields(...fields);
+        configEmbed.setTimestamp();
         configEmbed.setFooter(...BotConfig.EMBED_FOOTER_ARGS);
         configEmbed.setColor(BotConfig.EMBED_COLOR);
         return message.reply(configEmbed);

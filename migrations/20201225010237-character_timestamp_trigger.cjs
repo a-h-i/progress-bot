@@ -3,7 +3,7 @@
 module.exports = {
     up: async (queryInterface, _Sequelize) => {
         const sql = `CREATE TRIGGER set_updated_at
-        BEFORE UPDATE ON guild_configs
+        BEFORE UPDATE ON characters
         FOR EACH ROW
         EXECUTE PROCEDURE trigger_update_timestamp();
         `;
@@ -11,7 +11,7 @@ module.exports = {
     },
 
     down: async (queryInterface, _Sequelize) => {
-        const sql = 'DROP TRIGGER IF EXISTS set_updated_at ON guild_configs CASCADE';
+        const sql = 'DROP TRIGGER IF EXISTS set_updated_at ON characters CASCADE';
         return await queryInterface.sequelize.query(sql);
     }
 };

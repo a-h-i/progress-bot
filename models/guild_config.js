@@ -148,6 +148,15 @@ class GuildConfig extends Sequelize.Model {
         return Object.getOwnPropertyNames(this.get(attribute));
     }
 
+    /**
+     * Creates and returns a new Map representing the config roles role => role.
+     * for better lookup
+     * @returns {Map}
+     */
+    getConfigRolesAsMap() {
+        return new Map(Object.entries(this.configurationRoles));
+    }
+
 }
 
 

@@ -1,6 +1,7 @@
 import * as Config from './config/index.js';
 import * as Discord from 'discord.js';
 import * as Command from './commands/index.js';
+const logger = Config.logger;
 
 const client = new Discord.Client({
     presence: {
@@ -11,7 +12,7 @@ const client = new Discord.Client({
     }
 });
 client.once('ready', () => {
-    console.info('Client connected');
+    logger.info('Client connected');
 });
 
 client.commandsHandler = new Command.CommandHandler();
@@ -21,8 +22,7 @@ for (const commandClass of Command.commandClasses) {
 
 client.on('message', client.commandsHandler.handleMessage.bind(client.commandsHandler));
 
-client.login(Config.BOT_TOKEN).then((userid) => console.info(`Bot logged in with userid: ${userid}`),
+client.login(Config.BOT_TOKEN).then((userid) => logger.info(`Bot logged in with userid: ${userid}`),
     (err) => {
-        console.error('Bot failed to login');
-        console.error(err);
+        logger.error('Bot failed to login', err);
     });

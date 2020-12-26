@@ -1,6 +1,7 @@
 import { BaseCommand } from './base_command.js';
 import { GuildConfig } from '../models/index.js';
 import * as Config from '../config/index.js';
+const logger = Config.logger;
 /**
  * Handles executing commands and detecting guild configurations
  */
@@ -46,8 +47,7 @@ class CommandHandler {
                 return this.commands.get('help').execute(message, guildConfig);
             }
         } catch (err) {
-            console.error('Error in handleMessage');
-            console.error(err);
+            logger.error('Error in handleMessage', err);
             return message.reply(`Error handling your message, please report the circumstances on our issues page ${Config.ISSUES_URL}`);
         }
     }

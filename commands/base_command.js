@@ -39,7 +39,7 @@ class BaseCommand {
      * @returns {Array} - array of arguments minus the prefix, might include command
      */
     static argsArray(message, prefix) {
-        return message.content.slice(prefix.length).trim().split(/ +/);
+        return message.content.trim().slice(prefix.length).trim().split(/ +/);
     }
 
     toString() {
@@ -60,6 +60,24 @@ class BaseCommand {
         }
         embed.setTimestamp().setFooter(...Config.EMBED_FOOTER_ARGS);
         return embed;
+    }
+
+    /**
+     * 
+     * @param {discordjs.GuildMemberextends} user - Discord GuildMember
+     * @param {Map} allowedRoleids - map of allowed role ids where the ids are keys
+     * @param {boolean} [allowAdmin=true] - allow admin
+     * @returns {boolean} true if allowed
+     */
+    hasPermission(user, allowedRoleids, allowAdmin = true) {
+        return (allowAdmin && user.hasPermission([ 'MANAGE_GUILD' ], {
+            checkAdmin: true, checkOwner: true
+        })) || user.roles.cache.some((role) => allowedRoleids.has(role.id));
+    }
+
+    
+    standardNotAllowedMessage(message) {
+        return message.reply('Sorry you are not allowed to use this command.');
     }
 }
 

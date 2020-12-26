@@ -7,7 +7,8 @@ const DEFAULT_SETTINGS = {
     migrationStorageTableSchema: 'sequelize_schema',
     password: process.env.STATERA_DB_PASSWORD,
     username: process.env.STATERA_DB_USERNAME || 'statera_dev',
-    port: process.env.STATERA_DB_PORT || '5432'
+    port: process.env.STATERA_DB_PORT || '5432',
+    native: false
 };
 
 module.exports.development = Object.assign({}, DEFAULT_SETTINGS);
@@ -18,7 +19,6 @@ module.exports.production = Object.assign({}, DEFAULT_SETTINGS);
 // Dissalow default DB user value in production
 module.exports.production.username = process.env.STATERA_DB_USERNAME;
 module.exports.production.database = process.env.STATERA_DB_NAME;
-
 
 
 
