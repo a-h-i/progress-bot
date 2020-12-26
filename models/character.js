@@ -166,10 +166,10 @@ class Character extends Sequelize.Model {
      * @param {string} userId 
      * @param {string} name 
      * @param {Sequelize.Transaction} [transaction]
-     * @return {Promise}
+     * @return {Promise <Character>} resolved to updated character or null if no character found
      */
-    static retire(guildId, userId, name, transaction) {
-        return Character.update({
+    static async retire(guildId, userId, name, transaction) {
+        const updateResult = await Character.update({
             isRetired: true,
             isActive: false
         }, {
@@ -178,14 +178,16 @@ class Character extends Sequelize.Model {
                 userId: userId,
                 name: name
             },
-            transaction: transaction
+            transaction: transaction,
+            returning: true
         });
+        return updateResult[0] == 0 ? null : updateResult[1][0];
     }
 
     /**
      * Retires this instance
      * Updates underlying storage
-     * @returns {Promise}
+     * @returns {Promise <Character>}
      */
     retire(transaction) {
         return Character.retire(this.guildId, this.userId, this.name, transaction);
@@ -285,7 +287,7 @@ class Character extends Sequelize.Model {
     }
 
     toString() {
-        return `${this.name} Level: ${this.level} Experience: ${this.experience} Gold: ${this.gold} ${this.isActive? '- **Active**' : ''} ${this.isRetired? ' - **Retired**' : ''}`;
+        return `${this.name} Level: ${this.level} Experience: ${this.experience} Gold: ${this.gold} ${this.isActive? '- **Active**' : ''} ${this.isRetired? '- **Retired**' : ''}`;
     }
 }
 

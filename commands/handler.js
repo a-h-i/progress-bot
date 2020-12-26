@@ -47,7 +47,8 @@ class CommandHandler {
                 return this.commands.get('help').execute(message, guildConfig);
             }
         } catch (err) {
-            logger.error('Error in handleMessage', err);
+            logger.error('Error in handleMessage');
+            logger.error(err);
             return message.reply(`Error handling your message, please report the circumstances on our issues page ${Config.ISSUES_URL}`);
         }
     }

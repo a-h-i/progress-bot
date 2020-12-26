@@ -12,7 +12,8 @@ async function up(queryInterface, _Sequelize) {
             reward_formulas jsonb NOT NULL DEFAULT '{}'::jsonb,
             created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
             updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-            starting_level smallint NOT NULL DEFAULT 1
+            starting_level smallint NOT NULL DEFAULT 1,
+            retirement_keep_level smallint NOT NULL DEFAULT 20
         )
         `;
         await queryInterface.sequelize.query(sql, { transaction: transaction });

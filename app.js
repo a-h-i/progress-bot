@@ -24,5 +24,6 @@ client.on('message', client.commandsHandler.handleMessage.bind(client.commandsHa
 
 client.login(Config.BOT_TOKEN).then((userid) => logger.info(`Bot logged in with userid: ${userid}`),
     (err) => {
-        logger.error('Bot failed to login', err);
+        logger.error('Bot failed to login');
+        logger.error(err);
     });

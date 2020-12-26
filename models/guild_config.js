@@ -1,5 +1,6 @@
 import Sequelize from 'sequelize';
 import { DEFAULT_PREFIX, MAX_PREFIX_LENGTH } from '../config/index.js';
+import { Character } from './character.js';
 
 /**
  * A configuration model for a specific guild
@@ -56,6 +57,12 @@ class GuildConfig extends Sequelize.Model {
                 type: Sequelize.DataTypes.JSONB,
                 defaultValue: {},
                 field: 'configuration_roles'
+            }, 
+            retirementKeepLevel: {
+                allowNull: false,
+                type: Sequelize.DataTypes.SMALLINT,
+                defaultValue: 20,
+                field: 'retirement_keep_level'
             }
         }, {
             sequelize,
@@ -85,6 +92,10 @@ class GuildConfig extends Sequelize.Model {
 
     static isValidStartingLevel(level) {
         return level >= 1 && level <= 20;
+    }
+
+    static isValidRetirementKeepLevel(level) {
+        return Character.isValidStartingLevel(level);
     }
 
     /**

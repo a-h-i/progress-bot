@@ -61,7 +61,7 @@ class Register extends BaseCommand {
             if (currentArg == '--xp') {
                 // Handle xp
                 const xpValueString = message.argsArray.shift();
-                startingXp = parseInt(xpValueString);
+                startingXp = parseInt(xpValueString, 10);
                 if (isNaN(startingXp)) {
                     // could not be parsed
                     logger.notice(`Could not parse xp value in register command, value: ${xpValueString}`);

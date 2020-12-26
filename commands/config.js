@@ -101,6 +101,10 @@ class Config extends BaseCommand {
                 description: '--config-remove-roles <@Role1> ... <@RoleN> : Remove roles',
                 title: 'Config remove roles'
                 
+            },
+            {
+                name: '--retirement-level',
+                description: '--retirement-level <number> : If a character is retired before it reaches this level, the character is deleted. Set to 1 if you want to keep all characters. Defaults to 20'
             }
         ];
         // TODO: remove after complete implementation of subcommands
@@ -137,6 +141,7 @@ class Config extends BaseCommand {
                 this.interactiveModePrefix,
                 this.interactiveModeStartingLevel,
                 this.interactiveModeStartingGold,
+                this.interactiveModeRetirementLevel,
                 this.interactiveModeCharCreationRoles,
                 this.interactiveModeRewardRoles,
                 this.interactiveModeConfigRoles
@@ -157,7 +162,8 @@ class Config extends BaseCommand {
             
 
         } catch (err) {
-            logger.error('Error handling interactive config', err);
+            logger.error('Error handling interactive config');
+            logger.error(err);
             throw err;
         }
         
@@ -228,9 +234,52 @@ Reply with s to skip this setting, keeping the current value.`;
                 break;
             }
             level = parseInt(level, 10);
-            level = parseInt(level, 10);
             if (GuildConfig.isValidStartingLevel(level)) {
                 guildConfig.startingLevel = level;
+                return true;
+            } else {
+                await message.reply('Value must be between 1-20.');
+                retryCount++;
+            }
+        } while (retryCount < MAX_RETRY_COUNT);
+        // Max retry count reached and no valid value entered.
+        await message.reply('Skipping setting.');
+        return true;
+    }
+
+    async interactiveModeRetirementLevel(message, guildConfig) {
+        const prompt = `Please enter a level for which to keep track of retired character. Characters under that level
+will be permanently deleted if they are retired.
+Current retirement level is ${guildConfig.retirementKeepLevel}
+Reply with c to cancel the entire process.
+Reply with s to skip this setting, keeping the current value.`;
+        let retryCount = 0;
+        const replyContentRegex = /^([cs]|\d{1,2})$/i;
+        const filter = (reply) => {
+            return reply.author.id == message.author.id && replyContentRegex.test(reply.content.trim());
+        };
+        do {
+            const promptMessage = await message.reply(prompt);
+            const collected = await message.channel.awaitMessages(filter, {
+                max: 1,
+                time: BotConfig.INTERACTIVE_DEFAULT_TIMEOUT
+            });
+            if (collected.size == 0) {
+                // time elapsed before user reply
+                await promptMessage.edit('Response timed out');
+                return false;
+            }
+            let level = collected.first().content.trim().toLowerCase();
+            if (level === 'c') {
+                // canceled
+                return false;
+            } else if (level === 's') {
+                // skipped
+                break;
+            }
+            level = parseInt(level, 10);
+            if (GuildConfig.isValidRetirementKeepLevel(level)) {
+                guildConfig.retirementKeepLevel = level;
                 return true;
             } else {
                 await message.reply('Value must be between 1-20.');
@@ -361,7 +410,8 @@ reply with c to cancel or s to skip.`;
         };
         startingValueField.value = `Prefix: ${guildConfig.prefix}
 Starting Level: ${guildConfig.startingLevel}
-Starting Gold: ${guildConfig.startingGold}`;
+Starting Gold: ${guildConfig.startingGold}
+Retirement level: ${guildConfig.retirementKeepLevel}`;
         
         const fields = [ startingValueField ];
         const creationRoles = this.roleIdsToNamesHelper(guildConfig.getCharCreationRoles(), message.guild.roles);
