@@ -37,7 +37,7 @@ class Config extends BaseCommand {
                 name: '--list',
                 description: 'if present simply lists the current configuration',
                 title: 'List configuration',
-                handle: Config.prototype.handleListSubCommand
+                handler: Config.prototype.handleListSubCommand
             },
             {
                 name: '--prefix',
@@ -104,7 +104,26 @@ class Config extends BaseCommand {
             },
             {
                 name: '--retirement-level',
-                description: '--retirement-level <number> : If a character is retired before it reaches this level, the character is deleted. Set to 1 if you want to keep all characters. Defaults to 20'
+                description: '--retirement-level <number> : If a character is retired before it reaches this level, the character is deleted. Set to 1 if you want to keep all characters. Defaults to 20',
+                title: 'Retirement Level'
+            },
+            {
+                name: '--list-reward-formulas', 
+                description: '--list-reward-formulas : Lists reward formulas.',
+                title: 'List Formulas',
+                handler: Config.prototype.handleListRewardFormulasSubCommand 
+            },
+            {
+                name: '--reward-formulas-add',
+                description: '--reward-formulas-add variableName formula : adds a formula that resolves to variableName',
+                title: 'Add Formula',
+                handler: Config.prototype.handleRewardFormulaAdd
+            }, 
+            {
+                name: '--reward-formulas-remove',
+                description: '--reward-formulas-remove variableName : Removes a formula that resolves to variable variableName.',
+                title: 'Remove Formula',
+                handler: Config.prototype.handleRewardFormulaRemove
             }
         ];
         // TODO: remove after complete implementation of subcommands
@@ -127,7 +146,7 @@ class Config extends BaseCommand {
         const subCommand = message.argsArray.shift().toLowerCase();
         for (const arg of this.commandArguments) {
             if (arg.name === subCommand) {
-                return arg.handle.call(this, message, guildConfig);
+                return arg.handler.call(this, message, guildConfig);
             }
         }
         // invalid usage
@@ -394,6 +413,56 @@ reply with c to cancel or s to skip.`;
         return this.roleInteractiveHelper(message, prompt, handler);
     }
 
+    static rewardFormulasToStringHelper(rewardFormulas) {
+        let replyContent = [];
+        for ( const variable in rewardFormulas) {
+            replyContent.push(`${variable}   =    ${rewardFormulas[variable]}`);
+        }
+        return replyContent.join('\n');
+    }
+
+    async handleListRewardFormulasSubCommand(message, guildConfig) {
+        if (Object.getOwnPropertyNames(guildConfig.rewardFormulas).length == 0) {
+            return message.reply('No formulas defined.');
+        }
+        const formulasStr = Config.rewardFormulasToStringHelper(guildConfig.rewardFormulas);
+        return message.reply(`Variable - Formula\n${formulasStr}`);
+    }
+
+    async handleRewardFormulaAdd(message, guildConfig) {
+
+        if (message.argsArray.length < 2) {
+            return message.reply(`Invalid usage. Please  refer to ${BotConfig.DM_REWARDS_WIKI_URL}`);
+        }
+
+        const formulaVariable = message.argsArray.shift();
+        const formula = message.argsArray.join(' ');
+        guildConfig.rewardFormulas[formulaVariable] = formula;
+        guildConfig.changed('rewardFormulas', true);
+        await guildConfig.save();
+        const formulaStr = Config.rewardFormulasToStringHelper(guildConfig.rewardFormulas);
+        return message.reply(`Forumla Added
+Current Formulas
+Variable - Formula
+${formulaStr}`);
+    }
+
+    async handleRewardFormulaRemove(message, guildConfig) {
+        if (message.argsArray.length < 1) {
+            return message.reply('Must specify at least one variable name');
+        }
+        for (const formulaName of message.argsArray) {
+            if (guildConfig.rewardFormulas.hasOwnProperty(formulaName) ) {
+                delete guildConfig.rewardFormulas[formulaName];
+                guildConfig.changed('rewardFormulas', true);
+            }
+        }
+        
+        await guildConfig.save();
+        await message.reply('Formulas that resolve to specified variables deleted');
+        return this.handleListRewardFormulasSubCommand(message, guildConfig);
+    }
+
     /**
      * 
      * @param {discordjs.Message} message 
@@ -434,6 +503,14 @@ Retirement level: ${guildConfig.retirementKeepLevel}`;
             inline: true,
             value: configRoles
         });
+
+        if (Object.getOwnPropertyNames(guildConfig.rewardFormulas).length != 0) {
+            fields.push({
+                name: 'Reward Fromulas',
+                inline: false,
+                value: Config.rewardFormulasToStringHelper(guildConfig.rewardFormulas)
+            });
+        }
 
         configEmbed.addFields(...fields);
         configEmbed.setTimestamp();

@@ -16,6 +16,16 @@ if (process.env.NODE_ENV === 'development') {
         ),
         handleExceptions: true
     }));
+    transports.push(new winston.transports.File({
+        level: 'debug',
+        format: winston.format.combine(
+            winston.format.errors({ stack: true }),
+            winston.format.timestamp(),
+            winston.format.prettyPrint()
+        ),
+        filename: 'logs/statera_dev_logs',
+        options: { flags: 'w' }
+    }));
 }
 
 if (process.env.NODE_ENV === 'test') {

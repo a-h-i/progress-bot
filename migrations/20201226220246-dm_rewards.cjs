@@ -1,21 +1,17 @@
+'use strict';
 
 async function up(queryInterface, _Sequelize) {
     const transaction = await queryInterface.sequelize.transaction();
+
     try {
-        const sql =`CREATE TABLE IF NOT EXISTS guild_configs (
-            starting_gold double precision NOT NULL DEFAULT 0,
+        const sql = `CREATE TABLE IF NOT EXISTS dm_rewards (
             created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
             updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-            starting_level smallint NOT NULL DEFAULT 1,
-            retirement_keep_level smallint NOT NULL DEFAULT 20,
-            id varchar(64)  PRIMARY KEY,
-            prefix varchar(64)  DEFAULT NULL,
-            reward_roles jsonb NOT NULL DEFAULT '{}'::jsonb,
-            char_creation_roles jsonb NOT NULL DEFAULT '{}'::jsonb,
-            configuration_roles jsonb NOT NULL DEFAULT '{}'::jsonb,
-            reward_formulas jsonb NOT NULL DEFAULT '{}'::jsonb
-        )
-        `;
+            guild_id  varchar(64) NOT NULL REFERENCES guild_configs(id) ON UPDATE CASCADE ON DELETE CASCADE,
+            user_id varchar(64) NOT NULL,
+            computed_values jsonb NOT NULL DEFAULT '{}'::jsonb,
+            PRIMARY KEY (guild_id, user_id)
+        )`;
         await queryInterface.sequelize.query(sql, { transaction: transaction });
         await transaction.commit();
     } catch (err) {
@@ -23,13 +19,16 @@ async function up(queryInterface, _Sequelize) {
         await transaction.rollback();
         throw err;
     }
-}
 
+}
 
 async function down(queryInterface, _Sequelize) {
     const transaction = await queryInterface.sequelize.transaction();
     try {
-        await queryInterface.sequelize.query('DROP TABLE IF EXISTS guild_configs CASCADE', { transaction: transaction });
+        await queryInterface.sequelize.query(
+            'DROP TABLE IF EXISTS dm_rewards CASCADE',
+            { transaction: transaction }
+        );
         await transaction.commit();
     } catch (err) {
         console.error(err);
@@ -37,7 +36,6 @@ async function down(queryInterface, _Sequelize) {
         throw err;
     }
 }
-
 
 module.exports = {
     up: up,

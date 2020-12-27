@@ -3,7 +3,10 @@ import * as Config from '../config/index.js';
 
 const LEAD_TRAIL_QUOTES_REGEX = /(^['"])|(['"]$)/g;
 
-
+/**
+ * Captures user ID from a user mention text as it appears in message.content
+ */
+const USER_ID_REGEX = /<@!?(?<id>\d+)>/;
 
 /**
  * A base class for bot commands
@@ -84,6 +87,7 @@ class BaseCommand {
     standardNotAllowedMessage(message) {
         return message.reply('Sorry you are not allowed to use this command.');
     }
+    
     /**
      * Removes leading and trailing single or double quotes from str
      * @param {string} str 
@@ -91,6 +95,16 @@ class BaseCommand {
      */
     static removeLeadingAndTrailingQuoutes(str) {
         return str.replace(LEAD_TRAIL_QUOTES_REGEX, '');
+    }
+
+    /**
+     * returns the user ID from it's string representation as it apprears in message.content.
+     * @param {string} content 
+     * @returns null if could not find a user mention format in content. Otherwise the id as a string
+     */
+    static extractUserIDFromMentionContent(content) {
+        const match = content.match(USER_ID_REGEX);
+        return match == null ? null : match[0].groups.id;
     }
 }
 
