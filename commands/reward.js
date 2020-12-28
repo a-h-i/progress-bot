@@ -50,6 +50,7 @@ class RewardCommand extends BaseCommand {
                 // possible user id mention and character name
                 const userId = BaseCommand.extractUserIDFromMentionContent(firstArg);
                 if (userId !== null) {
+                    // FIXME: Character name can be space seperated into multiple entries in argsArray
                     userIdCharacterNameTuples.push([ userId, secondArg ]);
                 } else {
                     otherFail = true;
@@ -61,7 +62,7 @@ class RewardCommand extends BaseCommand {
         if (otherFail || [ rewardedXp, rewardedGold, extraValue ].some(isNaN)) {
             return message.reply(`Could not parse arguments. Refer to ${BotConfig.DM_REWARDS_WIKI_URL}`);
         }
-        const transaction = await sequelize.transaction({ isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.READ_COMMITTED });
+        const transaction = await sequelize.transaction({ isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.REPEATABLE_READ });
         try {
             const characterPromises = userIdCharacterNameTuples.map(([ userId, charName ]) => {
                 return Character.findOne({
@@ -91,25 +92,15 @@ class RewardCommand extends BaseCommand {
             dmReward.calculate(guildConfig.rewardFormulas, characterLevels, charactersXp, 
                 rewardedXp, rewardedGold, extraValue);
             
-            // reward characters
-            const characterOrCondition = characters.map((character) => {
-                return {
-                    guildId: guildConfig.id,
-                    userId: character.userId,
-                    name: character.name
-                };
+            
+            // reward gold and exp
+            const characterSavePromises = characters.map((character) => {
+                character.earnXp(rewardedXp);
+                character.earnGold(rewardedGold);
+                return character.save({ transaction: transaction });
             });
-            await Character.increment({
-                gold: rewardedGold,
-                experience: rewardedXp
-            }, {
-                where: {
-                    guildId: guildConfig.id,
-                    [Sequelize.Op.or]: characterOrCondition
-                }, 
-                transaction: transaction
-            });
-                
+
+            await Promise.all(characterSavePromises);
             // save DM reward
             await dmReward.save({ transaction: transaction });
             

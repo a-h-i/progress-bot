@@ -12,11 +12,11 @@ class SpendCommand extends BaseCommand {
     }
 
     async execute(message, guildConfig) {
-        let spendAmmount = parseFloat(message.argsArray.shift());
-        if (isNaN(spendAmmount)) {
+        let spendamount = parseFloat(message.argsArray.shift());
+        if (isNaN(spendamount)) {
             return message.reply(this.createHelpEmbed());
         }
-        spendAmmount = Math.abs(spendAmmount) * -1;
+        spendamount = Math.abs(spendamount) * -1;
         const transaction = await sequelize.transaction({ isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.REPEATABLE_READ });
         try {
             const activeChar = await Character.getActiveCharacter(message.author.id, guildConfig.id, transaction);
@@ -24,10 +24,10 @@ class SpendCommand extends BaseCommand {
                 await transaction.commit();
                 return message.reply('No currently active character with this guild.');
             }
-            const resultedBalance = activeChar.gold - spendAmmount;
+            const resultedBalance = activeChar.gold - spendamount;
             if (resultedBalance >= 0) {
                 const result = await Character.increment({
-                    gold: spendAmmount
+                    gold: spendamount
                 }, {
                     where: {
                         userId: activeChar.userId,

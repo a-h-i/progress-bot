@@ -201,6 +201,14 @@ class Character extends Sequelize.Model {
         return Character.setActive(this.guildId, this.userId, this.name, transaction);
     }
 
+    earnGold(amount) {
+        this.set('gold', this.gold + amount);
+    }
+
+    earnXp(amount) {
+        this.set('experience', this.experience + amount);
+        this.updateLevel();
+    }
   
 
     static getLevelFromXp(xp) {
@@ -248,7 +256,9 @@ class Character extends Sequelize.Model {
         } else if (this.experience > LEVEL_EXPERIENCE_SEQUENCE[LEVEL_EXPERIENCE_SEQUENCE.length - 1]) {
             this.experience = LEVEL_EXPERIENCE_SEQUENCE[LEVEL_EXPERIENCE_SEQUENCE.length - 1];
         }
-        return this.level = Character.getLevelFromXp(this.experience);
+        this.set('level', Character.getLevelFromXp(this.experience));
+        return this.level;
+        
     }
 
     toString() {

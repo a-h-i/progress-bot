@@ -25,7 +25,7 @@ class CommandHandler {
         try {
             if (!message.guild) {
                 // NO associated guild known, such as when using DMs.
-                // Limits the ammount of commands that can be executed.
+                // Limits the amount of commands that can be executed.
                 // TODO: Support DMs
                 if (!message.content.startsWith(Config.DEFAULT_PREFIX)) return;
                 return message.reply('DMs are currently unsupported.');
