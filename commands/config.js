@@ -68,6 +68,7 @@ class Config extends BaseCommand {
                 name: '--character-creation-list-roles',
                 description: '--character-creation-list-roles : lists the roles that can create characters',
                 title: 'List character creation roles',
+                handler: Config.prototype.handleListCharacterCreationRoles
             },
             {
                 name: '--character-creation-remove-roles',
@@ -82,7 +83,8 @@ class Config extends BaseCommand {
             {
                 name: '--reward-list-roles',
                 description: '--reward-list-roles : lists the roles that can reward characters with xp and gold',
-                title: 'List reward roles'
+                title: 'List reward roles',
+                handler: Config.prototype.handleListRewardRoles
             },
             {
                 name: '--reward-remove-roles',
@@ -97,7 +99,8 @@ class Config extends BaseCommand {
             {
                 name: '--config-list-roles',
                 description: '--config-list-roles : List roles',
-                title: 'List config roles'
+                title: 'List config roles',
+                handler: Config.prototype.handleListConfigRoles
             },
             {
                 name: '--config-remove-roles',
@@ -487,21 +490,20 @@ Starting Gold: ${guildConfig.startingGold}
 Retirement level: ${guildConfig.retirementKeepLevel}`;
         
         const fields = [ startingValueField ];
-        const creationRoles = this.roleIdsToNamesHelper(guildConfig.getCharCreationRoles(), message.guild.roles);
-
+        const creationRoles = guildConfig.getCharCreationRoles().map((id) => message.guild.roles.cache.get(id)).join('\n');
         fields.push({
             name: 'Character Creation Roles',
             inline: true,
             value: creationRoles
         });
 
-        const rewardRoles = this.roleIdsToNamesHelper(guildConfig.getRewardRoles(), message.guild.roles);
+        const rewardRoles = guildConfig.getRewardRoles().map((id) => message.guild.roles.cache.get(id)).join('\n');
         fields.push({
             name: 'Reward Roles',
             inline: true,
             value: rewardRoles
         });
-        const configRoles = this.roleIdsToNamesHelper(guildConfig.getConfigRoles(), message.guild.roles);
+        const configRoles = guildConfig.getConfigRoles().map((id) => message.guild.roles.cache.get(id)).join('\n');
         fields.push({
             name: 'Configuration Roles',
             inline: true,
@@ -589,6 +591,23 @@ Retirement level: ${guildConfig.retirementKeepLevel}`;
         } else {
             return message.reply('Invalid retirement level');
         }
+    }
+
+    listRolesHelper(message, getRoleIds) {
+        const roles = getRoleIds().map((id) => message.guild.roles.cache.get(id));
+        return message.reply(`Current Roles\n${roles}`);
+    }
+
+    handleListCharacterCreationRoles(message, guildConfig) {
+        return this.listRolesHelper(message, () => guildConfig.getCharCreationRoles());
+    }
+    
+    handleListRewardRoles(message, guildConfig) {
+        return this.listRolesHelper(message, () => guildConfig.getRewardRoles());
+    }
+
+    handleListConfigRoles(message, guildConfig) {
+        return this.listRolesHelper(message, () => guildConfig.getConfigRoles());
     }
 }
 
