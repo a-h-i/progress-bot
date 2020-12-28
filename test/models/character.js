@@ -136,7 +136,7 @@ describe('Character', function() {
         });
     });
 
-    describe('setActive', function() {
+    describe('#setActive()', function() {
         let characters = [];
         const userId = 'test:character:user02';
         before(async function () {
@@ -215,6 +215,50 @@ describe('Character', function() {
 
         after(async function() {
             await GuildConfig.destroy({ truncate: true, cascade: true });
+        });
+    });
+
+    describe('#earnXp()', function() {
+        let character;
+        beforeEach(function() {
+            character = Character.build({
+                guildId: 'test:char:guild432',
+                userId: 'test:char:user:412',
+                name: 'Test Character Please Ignore',
+                level: 3,
+                experience: 900,
+                gold: 100,
+                isRetired: false,
+                isActive: true
+            });
+        });
+
+        it('should not change level if not enough to level up', function() {
+            const xpAmount = 1000;
+            const expectedXp = character.experience + xpAmount;
+            const expectedLevel = character.level;
+            character.earnXp(xpAmount);
+            character.level.should.equal(expectedLevel);
+            character.experience.should.equal(expectedXp);
+            
+        });
+
+        it('Should level up if enough to level up', function() {
+            const xpAmount = 2700;
+            const expectedXp = character.experience + xpAmount;
+            const expectedLevel = 4;
+            character.earnXp(xpAmount);
+            character.level.should.equal(expectedLevel);
+            character.experience.should.equal(expectedXp);
+        });
+
+        it('Should level up if enough to level up more than once', function() {
+            const xpAmount = 150123;
+            const expectedXp = character.experience + xpAmount;
+            const expectedLevel = 14;
+            character.earnXp(xpAmount);
+            character.level.should.equal(expectedLevel);
+            character.experience.should.equal(expectedXp);
         });
     });
 });

@@ -95,7 +95,7 @@ ${rewardedCharactersLines}`;
                 return message.reply(`Your dm rewards:\n${dmReward.displayRewardsTable()}`);
             }
             // timed out or did not match yes
-            transaction.rollback();
+            await transaction.rollback();
             
         } catch (err) {
             await transaction.rollback();
