@@ -43,6 +43,10 @@ class TransferCommand extends BaseCommand {
                 await transaction.rollback();
                 return message.reply('You do not have enough money to complete this transaction');
             }
+            if (sourceChar.userId == targetUserAsMember.id && charName == sourceChar.name) {
+                await transaction.rollback();
+                return message.reply('You successfully moved the gold from your right hand to your left hand');
+            }
             const targetCharCount = await Character.count({
                 where: {
                     guildId: guildConfig.id,

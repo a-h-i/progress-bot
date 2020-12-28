@@ -7,6 +7,7 @@ export { RetireCharacter } from './retire.js';
 export { RewardCommand } from './reward.js';
 export { SpendCommand } from './spend.js';
 export { TransferCommand } from './transfer.js';
+export { BaseCommand } from './base_command.js';
 
 import { Config } from './config.js';
 import { Help } from './help.js';

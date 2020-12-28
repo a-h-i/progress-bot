@@ -44,7 +44,7 @@ class BaseCommand {
      * Does not check if prefix exists.
      * @param {Message} message - discord js message object See {@link https://discord.js.org/#/docs/main/stable/class/Message}
      * @param {string} prefix - guild configuration
-     * @returns {Array} - array of arguments minus the prefix, might include command
+     * @returns {string[]} - array of arguments minus the prefix, might include command
      */
     static argsArray(message, prefix) {
         return message.content.trim().slice(prefix.length).trim().split(/ +/);
@@ -104,7 +104,7 @@ class BaseCommand {
      */
     static extractUserIDFromMentionContent(content) {
         const match = content.match(USER_ID_REGEX);
-        return match == null ? null : match[0].groups.id;
+        return match == null ? null : match.groups.id;
     }
 }
 
