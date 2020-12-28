@@ -108,7 +108,8 @@ class Config extends BaseCommand {
             {
                 name: '--retirement-level',
                 description: '--retirement-level <number> : If a character is retired before it reaches this level, the character is deleted. Set to 1 if you want to keep all characters. Defaults to 20',
-                title: 'Retirement Level'
+                title: 'Retirement Level',
+                handler: Config.prototype.handleRetirementLevelSubCommand
             },
             {
                 name: '--reward-formulas-list', 
@@ -576,6 +577,19 @@ Retirement level: ${guildConfig.retirementKeepLevel}`;
         }
     }
     
+    async handleRetirementLevelSubCommand(message, guildConfig) {
+        if (message.argsArray.length == 0) {
+            return message.reply(`Current retirement level is: ${guildConfig.retirementKeepLevel}`);
+        }
+        const retirementKeepLevel = parseInt(message.argsArray.shift(), 10);
+        if (GuildConfig.isValidRetirementKeepLevel(retirementKeepLevel)) {
+            guildConfig.retirementKeepLevel = retirementKeepLevel;
+            await guildConfig.save();
+            return message.reply(`Retirement level set to ${guildConfig.retirementKeepLevel}`);
+        } else {
+            return message.reply('Invalid retirement level');
+        }
+    }
 }
 
 export { Config };

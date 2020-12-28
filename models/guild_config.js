@@ -1,6 +1,5 @@
 import Sequelize from 'sequelize';
 import { DEFAULT_PREFIX, MAX_PREFIX_LENGTH } from '../config/index.js';
-import { Character } from './character.js';
 
 /**
  * A configuration model for a specific guild
@@ -95,7 +94,7 @@ class GuildConfig extends Sequelize.Model {
     }
 
     static isValidRetirementKeepLevel(level) {
-        return Character.isValidStartingLevel(level);
+        return GuildConfig.isValidStartingLevel(level);
     }
 
     /**
