@@ -16,7 +16,7 @@ class SpendCommand extends BaseCommand {
         if (isNaN(spendamount)) {
             return message.reply(this.createHelpEmbed());
         }
-        spendamount = Math.abs(spendamount) * -1;
+        spendamount = Math.abs(spendamount);
         const transaction = await sequelize.transaction({ isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.REPEATABLE_READ });
         try {
             const activeChar = await Character.getActiveCharacter(message.author.id, guildConfig.id, transaction);
@@ -27,7 +27,7 @@ class SpendCommand extends BaseCommand {
             const resultedBalance = activeChar.gold - spendamount;
             if (resultedBalance >= 0) {
                 const result = await Character.increment({
-                    gold: spendamount
+                    gold: spendamount * -1
                 }, {
                     where: {
                         userId: activeChar.userId,
