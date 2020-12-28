@@ -108,7 +108,7 @@ class Config extends BaseCommand {
                 title: 'Retirement Level'
             },
             {
-                name: '--list-reward-formulas', 
+                name: '--reward-formulas-list', 
                 description: '--list-reward-formulas : Lists reward formulas.',
                 title: 'List Formulas',
                 handler: Config.prototype.handleListRewardFormulasSubCommand 

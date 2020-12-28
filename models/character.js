@@ -201,42 +201,7 @@ class Character extends Sequelize.Model {
         return Character.setActive(this.guildId, this.userId, this.name, transaction);
     }
 
-    /**
-     * Attempts to spend amount of gold. Returns false if the character's balance can not cover it.
-     * Updates instance field but does not update underlying storage.
-     * @param {number} amount - amount to be deducted
-     * @returns {boolean} true if amount can be covered by current balance
-     */
-    spend(amount) {
-        if (this.gold < amount) {
-            return false;
-        }
-        this.gold -= amount;
-        return true; 
-    }
-
-    /**
-     * adds amount to current gold.
-     * Does not update underlying storage
-     * @param {number} amount - gold earned
-     * @returns {number} new gold balance
-     */
-    earn(amount) {
-        return this.gold += amount;
-    }
-
-
-    /**
-     * Adds xp to current experience and recalculates level.
-     * xp can be a negative number.
-     * @param {number} xp 
-     * @returns {number} new experience
-     */
-    earnXp(xp) {
-        this.experience += xp;
-        this.updateLevel();
-        return this.experience;
-    }
+  
 
     static getLevelFromXp(xp) {
         let low = 0;
@@ -288,6 +253,23 @@ class Character extends Sequelize.Model {
 
     toString() {
         return `${this.name} Level: ${this.level} Experience: ${this.experience} Gold: ${this.gold} ${this.isActive? '- **Active**' : ''} ${this.isRetired? '- **Retired**' : ''}`;
+    }
+
+    /**
+     * 
+     * @param {string} userId 
+     * @param {string} guildId 
+     * @param {Sequelize.Transaction} transaction 
+     * @returns {Promise} resolves to Character instance or null if no active character.
+     */
+    static getActiveCharacter(userId, guildId, transaction) {
+        return Character.findOne({
+            where: {
+                userId: userId,
+                guildId: guildId,
+                isActive: true
+            }, transaction: transaction
+        });
     }
 }
 
