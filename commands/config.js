@@ -56,7 +56,8 @@ class Config extends BaseCommand {
                 name: '--starting-gold',
                 description: '--starting-gold <positive_real_number> : set the starting gold for new characters, defaults to 0. Use with no value to get the current value, accepts decimals.',
                 default_value: 0,
-                title: 'Character starting gold'
+                title: 'Character starting gold',
+                handler: Config.prototype.handleStartingGoldSubCommand
             },
             {
                 name: '--character-creation-add-roles',
@@ -557,6 +558,21 @@ Retirement level: ${guildConfig.retirementKeepLevel}`;
             return message.reply(`Starting level set to: ${guildConfig.startingLevel}`);
         } else {
             return message.reply('Invalid starting level');
+        }
+    }
+
+    async handleStartingGoldSubCommand(message, guildConfig) {
+        if (message.argsArray.length == 0) {
+            // get current starting gold
+            return message.reply(`Current starting gold: ${guildConfig.startingGold}`);
+        }
+        const startingGold = parseFloat(message.argsArray.shift());
+        if (GuildConfig.isValidStartingGold(startingGold)) {
+            guildConfig.startingGold = startingGold;
+            await guildConfig.save();
+            return message.reply(`Starting gold set to ${guildConfig.startingGold}`);
+        } else {
+            return message.reply('Invalid starting gold');
         }
     }
     
