@@ -42,7 +42,8 @@ class Config extends BaseCommand {
             {
                 name: '--prefix',
                 description: '--prefix <string> : set the default prefix, call with no value to get the current prefix. Max length of 64',
-                title: 'Bot prefix'
+                title: 'Bot prefix',
+                handler: Config.prototype.handlePrefixSubCommand
             },
             {
                 name: '--starting-level',
@@ -528,6 +529,20 @@ Retirement level: ${guildConfig.retirementKeepLevel}`;
         return ids.map((id) => roleManager.cache.get(id).name).join(', ');
     }
 
+    async handlePrefixSubCommand(message, guildConfig) {
+        if (message.argsArray.length == 0) {
+            // get current prefix
+            return message.reply(`Current prefix is: ${guildConfig.prefix}`);
+        }
+        const prefix = message.argsArray.shift().toLowerCase();
+        if (GuildConfig.isValidPreixString(prefix)) {
+            guildConfig.prefix = prefix;
+            await guildConfig.save();
+            return message.reply(`Prefix changed to ${guildConfig.prefix}`);
+        } else {
+            return message.reply('Invalid Prefix');
+        }
+    }
     
 }
 
