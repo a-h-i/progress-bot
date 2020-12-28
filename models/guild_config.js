@@ -134,6 +134,36 @@ class GuildConfig extends Sequelize.Model {
     }
 
     /**
+     * 
+     * @param {string} attribute - attribute name
+     * @param {string} role - role id
+     */
+    addRoleHelper(attribute, role) {
+        this.get(attribute)[role] = role;
+        this.changed(attribute, true);
+    }
+
+    /**
+     * 
+     * @param {string} attribute - attribute name
+     * @param {string} role - role id
+     */
+    removeRoleHelper(attribute, role) {
+        if (this.get(attribute).hasOwnProperty(role)) {
+            delete this.get(attribute)[role];
+            this.changed(attribute, true);
+        }
+    }
+
+    addConfigRole(roleId) {
+        this.addRoleHelper('configurationRoles', roleId);
+    }
+
+    removeConfigRole(roleId) {
+        this.removeRoleHelper('configurationRoles', roleId);
+    }
+
+    /**
      * @returns {string[]} array of role ids
      */
     getConfigRoles() {
@@ -147,11 +177,27 @@ class GuildConfig extends Sequelize.Model {
         return this.getRolesHelper('rewardRoles');
     }
 
+    addRewardRole(roleId) {
+        this.addRoleHelper('rewardRoles', roleId);
+    }
+
+    removeRewardRole(roleId) {
+        this.removeRoleHelper('rewardRoles', roleId);
+    }
+
     /**
      * @returns {string[]} array of role ids
      */
     getCharCreationRoles() {
         return this.getRolesHelper('charCreationRoles');
+    }
+
+    addCharCreationRole(roleId) {
+        this.addRoleHelper('charCreationRoles', roleId);
+    }
+
+    removeCharCreationRole(roleId) {
+        this.removeRoleHelper('charCreationRoles', roleId);
     }
 
     getRolesHelper(attribute) {

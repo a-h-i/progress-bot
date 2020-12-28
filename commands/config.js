@@ -62,7 +62,8 @@ class Config extends BaseCommand {
             {
                 name: '--character-creation-add-roles',
                 description: '--character-creation-add-roles <@Role1> <@Role2> ... <@Role3> : Allows the mentioned roles to use the create_char command.',
-                title: 'Adding character creation role'
+                title: 'Adding character creation role',
+                handler: Config.prototype.handleAddCharCreationRoles
             },
             {
                 name: '--character-creation-list-roles',
@@ -73,12 +74,14 @@ class Config extends BaseCommand {
             {
                 name: '--character-creation-remove-roles',
                 description: '--character-creation-remove-roles <@Role1> <@Role2> ... <@Role3> : Removes the mentioned roles from the list of allowed roles.',
-                title: 'Remove character creation roles'
+                title: 'Remove character creation roles',
+                handler: Config.prototype.handleRemoveCharCreationRoles
             },
             {
                 name: '--reward-add-roles',
                 description: '--reward-add-roles <@Role1> <@Role2> ... <@Role3> : Allows the mentioned roles use the reward command.',
-                title: 'Reward Roles'
+                title: 'Reward Roles',
+                handler: Config.prototype.handleAddRewardRoles
             },
             {
                 name: '--reward-list-roles',
@@ -89,12 +92,14 @@ class Config extends BaseCommand {
             {
                 name: '--reward-remove-roles',
                 description: '--reward-remove-roles <@Role1> <@Role2> ... <@Role3> : Removes the mentioned roles from the list',
-                title: 'Remove reward roles'
+                title: 'Remove reward roles',
+                handler: Config.prototype.handleRemoveRewardRoles
             },
             {
                 name: '--config-add-roles',
                 description: '--config-add-roles <@Role1> ... <@RoleN> : Allows the mentioned roles to change bot configuration',
-                title: 'Config Roles'
+                title: 'Config Roles',
+                handler: Config.prototype.handleAddConfigRoles
             },
             {
                 name: '--config-list-roles',
@@ -105,7 +110,8 @@ class Config extends BaseCommand {
             {
                 name: '--config-remove-roles',
                 description: '--config-remove-roles <@Role1> ... <@RoleN> : Remove roles',
-                title: 'Config remove roles'
+                title: 'Config remove roles',
+                handler: Config.prototype.handleRemoveConfigRoles
                 
             },
             {
@@ -136,7 +142,7 @@ class Config extends BaseCommand {
         // TODO: remove after complete implementation of subcommands
         args.forEach((arg) => {
             if (!arg.hasOwnProperty('handler')) {
-                arg.handler = () => true;
+                arg.handler = (message) => message.reply('Feature not yet implemented.');
             }
         });
         super('config', description, args);
@@ -595,7 +601,7 @@ Retirement level: ${guildConfig.retirementKeepLevel}`;
 
     listRolesHelper(message, getRoleIds) {
         const roles = getRoleIds().map((id) => message.guild.roles.cache.get(id));
-        return message.reply(`Current Roles\n${roles}`);
+        return message.reply(`Current Roles\n${roles.join(', ')}`);
     }
 
     handleListCharacterCreationRoles(message, guildConfig) {
@@ -609,6 +615,55 @@ Retirement level: ${guildConfig.retirementKeepLevel}`;
     handleListConfigRoles(message, guildConfig) {
         return this.listRolesHelper(message, () => guildConfig.getConfigRoles());
     }
+
+
+    async handleModifyRolesHelper(message, guildConfig, modifierFn, listRolesfn) {
+        if (message.mentions.roles.size == 0) {
+            return message.reply('Must mention at least one role');
+        }
+        message.mentions.roles.each((role) => modifierFn(role));
+        await guildConfig.save();
+        return this.listRolesHelper(message, listRolesfn);
+    }
+
+    handleRemoveRewardRoles(message, guildConfig) {
+        const listRolesfn = () => guildConfig.getRewardRoles();
+        const modifierFn = (role) => guildConfig.removeRewardRole(role.id);
+        return this.handleModifyRolesHelper(message, guildConfig, modifierFn, listRolesfn);
+    }
+
+    handleAddRewardRoles(message, guildConfig) {
+        const listRolesfn = () => guildConfig.getRewardRoles();
+        const modifierFn = (role) => guildConfig.addRewardRole(role.id);
+        return this.handleModifyRolesHelper(message, guildConfig, modifierFn, listRolesfn);
+    }
+
+    handleAddCharCreationRoles(message, guildConfig) {
+        const listRolesfn = () => guildConfig.getCharCreationRoles();
+        const modifierFn = (role) => guildConfig.addCharCreationRole(role.id);
+        return this.handleModifyRolesHelper(message, guildConfig, modifierFn, listRolesfn);
+    }
+
+    handleRemoveCharCreationRoles(message, guildConfig) {
+        const listRolesfn = () => guildConfig.getCharCreationRoles();
+        const modifierFn = (role) => guildConfig.removeCharCreationRole(role.id);
+        return this.handleModifyRolesHelper(message, guildConfig, modifierFn, listRolesfn);
+    }
+
+    handleAddConfigRoles(message, guildConfig) {
+        const listRolesfn = () => guildConfig.getConfigRoles();
+        const modifierFn = (role) => guildConfig.addConfigRole(role.id);
+        return this.handleModifyRolesHelper(message, guildConfig, modifierFn, listRolesfn);
+    }
+
+    handleRemoveConfigRoles(message, guildConfig) {
+        const listRolesfn = () => guildConfig.getConfigRoles();
+        const modifierFn = (role) => guildConfig.removeConfigRole(role.id);
+        return this.handleModifyRolesHelper(message, guildConfig, modifierFn, listRolesfn);
+    }
+
+
+
 }
 
 export { Config };
