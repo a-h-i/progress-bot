@@ -49,7 +49,8 @@ class Config extends BaseCommand {
                 name: '--starting-level',
                 description: '--starting-level <number> : set the starting level for new characters, defaults to 1. Use with no value to get the current value. Must be in [1, 20] range',
                 default_value: 1,
-                title: 'Character starting level'
+                title: 'Character starting level',
+                handler: Config.prototype.handleStartingLevelSubCommand
             },
             {
                 name: '--starting-gold',
@@ -541,6 +542,21 @@ Retirement level: ${guildConfig.retirementKeepLevel}`;
             return message.reply(`Prefix changed to ${guildConfig.prefix}`);
         } else {
             return message.reply('Invalid Prefix');
+        }
+    }
+
+    async handleStartingLevelSubCommand(message, guildConfig) {
+        if (message.argsArray.length == 0) {
+            // get current starting level
+            return message.reply(`Current starting level: ${guildConfig.startingLevel}`);
+        }
+        const startingLevel = parseInt(message.argsArray.shift(), 10);
+        if (GuildConfig.isValidStartingLevel(startingLevel)) {
+            guildConfig.startingLevel = startingLevel;
+            await guildConfig.save();
+            return message.reply(`Starting level set to: ${guildConfig.startingLevel}`);
+        } else {
+            return message.reply('Invalid starting level');
         }
     }
     
