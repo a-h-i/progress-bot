@@ -80,7 +80,7 @@ class BaseCommand {
     hasPermission(user, allowedRoleids, allowAdmin = true) {
         return (allowAdmin && user.hasPermission([ 'MANAGE_GUILD' ], {
             checkAdmin: true, checkOwner: true
-        })) || user.roles.cache.some((role) => allowedRoleids.has(role.id));
+        }) ) || user.roles.cache.some((role) => allowedRoleids.has(role.id));
     }
 
     

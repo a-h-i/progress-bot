@@ -213,6 +213,10 @@ class GuildConfig extends Sequelize.Model {
         return new Map(Object.entries(this.configurationRoles));
     }
 
+    getCharCreationRolesAsMap() {
+        return new Map(Object.entries(this.charCreationRoles));
+    }
+
     /**
      * Creates and returns a new Map representing the reward roles role => role.
      * for better lookup

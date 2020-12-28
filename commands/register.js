@@ -36,7 +36,7 @@ class Register extends BaseCommand {
     }
 
     async execute(message, guildConfig) {
-        if (!this.hasPermission(message.member, guildConfig.getConfigRolesAsMap())) {
+        if (!this.hasPermission(message.member, guildConfig.getCharCreationRolesAsMap())) {
             return this.standardNotAllowedMessage(message);
         }
         if (message.argsArray.length < 2 || message.mentions.users.size == 0 ) {
