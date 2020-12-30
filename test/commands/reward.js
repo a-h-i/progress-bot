@@ -60,5 +60,17 @@ describe('RewardCommand', function() {
             }
         });
 
+        it('Should handle incorrect arguments', function() {
+            // Based on bug detected on Dec 30th 2020
+            const inputStr = '$reward xp 100xp Character Not Exist';
+            const inputTokens = BaseCommand.argsArray({ content: inputStr }, '$');
+            // remove command name
+            inputTokens.shift();
+            const parseResult = RewardCommand.parseArguments(inputTokens);
+            parseResult.should.not.be.null;
+            parseResult.rewardedGold.should.be.NaN;
+            parseResult.ok.should.be.false;
+        });
+
     });
 });

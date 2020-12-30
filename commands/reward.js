@@ -197,7 +197,7 @@ ${rewardedCharactersLines}`;
                     parserState.accumulator = [];
                 } else {
                     parserState.state = 'END';
-                    parserState.ok = false;
+                    parsedValues.ok = false;
                     parserState.error = 'Invalid usage.';
                 }
                 break;
@@ -239,7 +239,7 @@ ${rewardedCharactersLines}`;
                 parserState.done = true;
                 break;
             case 'END':
-                return parsedValues;
+                break;
             default:
                 throw new Error('RewardCommand parser entered unknown state');
             }
