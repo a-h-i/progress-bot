@@ -57,7 +57,7 @@ class RewardCommand extends BaseCommand {
             for (let characterIndex = 0 ; characterIndex < characters.length; characterIndex++) {
                 if (characters[characterIndex] == null) {
                     await transaction.rollback();
-                    return message.reply(`Could not find character ${parsedValues.userIdCharacterNameTuples[characterIndex][1]} for user <@${userIdCharacterNameTuples[characterIndex[0]]}>`);
+                    return message.reply(`Could not find character ${parsedValues.userIdCharacterNameTuples[characterIndex][1]} for user <@${parsedValues.userIdCharacterNameTuples[characterIndex[0]]}>`);
                 }
             }
             const characterLevels = characters.map((character) => character.level);
@@ -93,6 +93,8 @@ ${rewardedCharactersLines}`;
                 await transaction.commit();
                 // reply with dmReward representation
                 return message.reply(`Your dm rewards:\n${dmReward.displayRewardsTable()}`);
+            } else {
+                message.reply('Canceled');
             }
             // timed out or did not match yes
             await transaction.rollback();

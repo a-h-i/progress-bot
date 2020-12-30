@@ -62,6 +62,12 @@ class GuildConfig extends Sequelize.Model {
                 type: Sequelize.DataTypes.SMALLINT,
                 defaultValue: 20,
                 field: 'retirement_keep_level'
+            },
+            rewardPools: {
+                allowNull: false,
+                type: Sequelize.DataTypes.JSONB,
+                defaultValue: {},
+                field: 'reward_pools'
             }
         }, {
             sequelize,
@@ -225,6 +231,50 @@ class GuildConfig extends Sequelize.Model {
     getRewardRolesAsMap() {
         return new Map(Object.entries(this.rewardRoles));
     }
+
+
+    removeRewardPool(poolName) {
+        if (this.hasRewardPool(poolName)) {
+            delete this.rewardPools[poolName];
+            this.changed('rewardPools', true);
+        }
+    }
+
+    getRewardPoolVars(name) {
+        if (this.hasRewardPool(name)) {
+            return this.rewardPools[name];
+        } else {
+            return null;
+        }
+    }
+    /**
+     * 
+     * @param {string} name 
+     * @return {boolean}
+     */
+    hasRewardPool(name) {
+        return this.rewardPools.hasOwnProperty(name);
+    }
+
+    /**
+     * 
+     * @param {string} poolName 
+     * @param {string[]} vars 
+     */
+    addRewardPool(poolName, vars) {
+        this.rewardPools[poolName] = Array.from(vars);
+        this.changed('rewardPools', true);
+    }
+
+    rewardPoolsToString() {
+        let replyContent = [];
+        for (const poolName in this.rewardPools) {
+            replyContent.push(`${poolName}   =   ${this.rewardPools[poolName].join(', ')}`);
+        }
+        return replyContent.join('\n');
+    }
+
+
 
 }
 

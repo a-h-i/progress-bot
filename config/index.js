@@ -11,6 +11,7 @@ const EMBED_FOOTER_ARGS = [ `${CAPITALIZED_BOT_NAME} bot - v${VERSION_STRING}` ]
 const EMBED_COLOR = process.env.STATERA_EMBED_COLOR || 'LUMINOUS_VIVID_PINK';
 const ISSUES_URL = 'https://github.com/a-h-i/progress-bot/issues';
 const DM_REWARDS_WIKI_URL = 'https://github.com/a-h-i/progress-bot/wiki/DM-Rewards';
+const REWARD_POOLS_WIKI_URL = 'https://github.com/a-h-i/progress-bot/wiki/DM-Rewards#Using-DM-Rewards';
 const BOT_ICON_URL = process.env.STATERA_BOT_ICON_URL || 'https://i.imgur.com/IPjZGrv.png';
 const INTERACTIVE_DEFAULT_TIMEOUT = 30000;
 const MAX_PREFIX_LENGTH = 64;
@@ -22,5 +23,6 @@ const BOT_PRESENCE_ACTIVITY_NAME = 'D&D';
 
 export { BOT_TOKEN, DEFAULT_PREFIX, PROJECT_HOME_PAGE, BOT_NAME, VERSION_STRING, EMBED_FOOTER_ARGS, CAPITALIZED_BOT_NAME,
     BOT_PRESENCE_ACTIVITY_TYPE, BOT_PRESENCE_ACTIVITY_NAME, EMBED_COLOR, ISSUES_URL,
-    DM_REWARDS_WIKI_URL, BOT_ICON_URL, INTERACTIVE_DEFAULT_TIMEOUT, MAX_PREFIX_LENGTH };
+    DM_REWARDS_WIKI_URL, BOT_ICON_URL, INTERACTIVE_DEFAULT_TIMEOUT, MAX_PREFIX_LENGTH,
+    REWARD_POOLS_WIKI_URL };
 export { logger } from './logging.js';

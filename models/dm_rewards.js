@@ -64,8 +64,8 @@ class DMReward extends Sequelize.Model {
             characterLevels: characterLevels,
             charactersXp: charactersXp,
             numberOfCharacters: characterLevels.length,
-            averageLevel: characterLevels.reduce((acc, level) => acc + level) / characterLevels.length,
-            averageXp: charactersXp.reduce((acc, xp) => acc + xp) / charactersXp.length
+            averageLevel: characterLevels.reduce((acc, level) => acc + level, 0) / characterLevels.length,
+            averageXp: charactersXp.reduce((acc, xp) => acc + xp, 0) / charactersXp.length
         };
 
         // Previous formula values
@@ -123,6 +123,43 @@ class DMReward extends Sequelize.Model {
         }
 
         return lines.join('\n');
+    }
+
+    /**
+     * 
+     * @param {number} amount 
+     * @param {string[]} variables list of variable names to consume in order.
+     * @returns {boolean} true if had enough to cover amount, otherwise false and record is unmodified
+     */
+    consume(amount, variables) {
+        const values = new Map();
+        let totalAvailable = 0;
+        for (const varName of variables) {
+            if (this.computedValues.hasOwnProperty(varName)) {
+                values.set(varName, this.computedValues[varName]);
+                totalAvailable += this.computedValues[varName];
+            }
+        }
+        
+        if (totalAvailable < amount) {
+            return false;
+        }
+        
+        for (const [ varName, value ] of values) {
+            if (amount <= 0 ) {
+                break;
+            }
+            const newValue = value - amount; // remaining value
+            amount = amount - value;
+            if (newValue <= 0) {
+                this.computedValues[varName] = 0;
+            } else {
+                this.computedValues[varName] = newValue;
+            }
+        }
+
+        this.changed('computedValues', true);
+        return true;
     }
 }
 

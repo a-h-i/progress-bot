@@ -122,7 +122,7 @@ class Config extends BaseCommand {
             },
             {
                 name: '--reward-formulas-list', 
-                description: '--list-reward-formulas : Lists reward formulas.',
+                description: '--reward-reward-list : Lists reward formulas.',
                 title: 'List Formulas',
                 handler: Config.prototype.handleListRewardFormulasSubCommand 
             },
@@ -137,9 +137,26 @@ class Config extends BaseCommand {
                 description: '--reward-formulas-remove variableName : Removes a formula that resolves to variable variableName.',
                 title: 'Remove Formula',
                 handler: Config.prototype.handleRewardFormulaRemove
+            },
+            {
+                name: '--reward-pools-list',
+                description: '--reward-pools-list : Lists current reward pools',
+                title: 'List pools',
+                handler: Config.prototype.handleListRewardPoolsSubCommand
+            },
+            {
+                name: '--reward-pool-remove',
+                description: '--reward-pool-remove poolName',
+                title: 'Remove reward pool',
+                handler: Config.prototype.handleRemoveRewardPoolSubCommand
+            },
+            {
+                name: '--reward-pool-add',
+                description: '--reward-pool-add poolName bonusXp xp',
+                title: 'Add reward pool',
+                handler: Config.prototype.handleAddRewardPoolSubCommand
             }
         ];
-        // TODO: remove after complete implementation of subcommands
         args.forEach((arg) => {
             if (!arg.hasOwnProperty('handler')) {
                 arg.handler = (message) => message.reply('Feature not yet implemented.');
@@ -148,18 +165,18 @@ class Config extends BaseCommand {
         super('config', description, args);
     }
 
-    execute(message, guildConfig) {
+    async execute(message, guildConfig) {
         if (!this.hasPermission(message.member, guildConfig.getConfigRolesAsMap())) {
             // Not allowed
             return this.standardNotAllowedMessage(message);
         }
         if (message.argsArray.length == 0) {
-            return this.interactiveConfig(message, guildConfig);
+            return await Promise.resolve(this.interactiveConfig(message, guildConfig));
         }
         const subCommand = message.argsArray.shift().toLowerCase();
         for (const arg of this.commandArguments) {
             if (arg.name === subCommand) {
-                return arg.handler.call(this, message, guildConfig);
+                return await Promise.resolve(arg.handler.call(this, message, guildConfig));
             }
         }
         // invalid usage
@@ -523,6 +540,13 @@ Retirement level: ${guildConfig.retirementKeepLevel}`;
                 value: Config.rewardFormulasToStringHelper(guildConfig.rewardFormulas)
             });
         }
+        if (Object.getOwnPropertyNames(guildConfig.rewardPools).length != 0) {
+            fields.push({
+                name: 'Reward Pools',
+                inline: false,
+                value: guildConfig.rewardPoolsToString()
+            });
+        }
 
         configEmbed.addFields(...fields);
         configEmbed.setTimestamp();
@@ -662,8 +686,45 @@ Retirement level: ${guildConfig.retirementKeepLevel}`;
         return this.handleModifyRolesHelper(message, guildConfig, modifierFn, listRolesfn);
     }
 
+    handleListRewardPoolsSubCommand(message, guildConfig) {
+        if (Object.getOwnPropertyNames(guildConfig.rewardPools).length == 0) {
+            return message.reply('No reward pools defined.');
+        } else {
+            const lines = guildConfig.rewardPoolsToString();
+            return message.reply(`Pool  -  Variables\n${lines}`);
+        }
+    }
 
+    async handleRemoveRewardPoolSubCommand(message, guildConfig) {
+        if (message.argsArray.length != 1) {
+            return this.rewardPoolUsageMessage(message);
+        }
+        const poolName = message.argsArray.shift();
+        if (!guildConfig.hasRewardPool(poolName)) {
+            return message.reply(`No pool named ${poolName}`);
+        }
+        guildConfig.removeRewardPool(poolName);
+        await guildConfig.save();
+        return this.handleListRewardPoolsSubCommand(message, guildConfig);
+    }
 
+    async handleAddRewardPoolSubCommand(message, guildConfig) {
+        if (message.argsArray.length < 2) {
+            return this.rewardPoolUsageMessage(message);
+        }
+        const poolName = message.argsArray.shift();
+        if (guildConfig.hasRewardPool(poolName)) {
+            return message.reply(`Pool ${poolName} already exists, please remove it first.`);
+        }
+        guildConfig.addRewardPool(poolName, message.argsArray);
+        await guildConfig.save();
+        return this.handleListRewardPoolsSubCommand(message, guildConfig);
+    }
+
+    rewardPoolUsageMessage(message) {
+        return message.reply(`Invalid usage, for help with reward pools check ${BotConfig.REWARD_POOLS_WIKI_URL}`);
+    }
+    
 }
 
 export { Config };
