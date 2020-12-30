@@ -7,11 +7,12 @@ Usage: dmreward poolName amount(xp|gold) Your Character Name To be Rewarded
 Example:
     dmreward xp 400xp Ibnis Talba
     Attempts to reward 400 xp from the xp reward pool to your own character named Ibnis Talba
+    Use dmreward without arguments to list your available DM rewards.
 `;
 
 class DMRewardCommand extends BaseCommand {
     constructor() {
-        super('dmreward', [], description);
+        super('dmreward', description, []);
     }
 
     async execute(message, guildConfig) {
