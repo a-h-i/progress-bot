@@ -42,9 +42,9 @@ class CommandHandler {
             
             const command = (message.argsArray.shift() || 'help').toLowerCase();
             if (this.commands.has(command)) {
-                return this.commands.get(command).execute(message, guildConfig);
+                return await Promise.resolve(this.commands.get(command).execute(message, guildConfig));
             } else {
-                return this.commands.get('help').execute(message, guildConfig);
+                return await Promise.resolve(this.commands.get('help').execute(message, guildConfig));
             }
         } catch (err) {
             logger.error('Error in handleMessage');

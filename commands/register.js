@@ -85,12 +85,30 @@ class Register extends BaseCommand {
             
         }
 
+        if (startingGold == Infinity) {
+            return message.reply(`Too much gold, max is ${Number.MAX_VALUE}`);
+        }
+
+        if (startingXp == Infinity) {
+            return message.reply('Too much xp, max is 355000');
+        }
+
         // transform charname to string
         charName = charName.join(' ');
         charName = BaseCommand.removeLeadingAndTrailingQuoutes(charName).trim();
         if (charName.length == 0) {
             logger.notice('Parsed empty char name');
             return message.reply('Invalid character name.');
+        }
+        const charCount = await Character.count({
+            where: {
+                guildId: guildConfig.id,
+                userId: userId,
+                name: charName
+            }
+        });
+        if (charCount != 0) {
+            return message.reply(`User already has a character named ${charName}`);
         }
         const char =  await Character.registerNewCharacter(guildConfig.id, userId,
             charName, startingXp, startingGold);
