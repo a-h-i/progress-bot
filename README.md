@@ -6,6 +6,12 @@ Statera
 
 A simple bot for managing and tracking D&D character progression in westmarch servers.
 
+To invite statera bot to your server [Click Here](https://discord.com/oauth2/authorize?client_id=787463819278549053&scope=bot&permissions=256064)
+
+For help setting up and using the bot on your server check out [Our wiki](../../wiki)
+
+If you are interested on running statera-bot on your machine, or contributing to the project keep reading.
+
 Node version `v15.3.0`
 
 
