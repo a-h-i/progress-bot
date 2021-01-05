@@ -2,7 +2,7 @@ import { config as dotenvConfig } from 'dotenv';
 dotenvConfig();
 
 const BOT_TOKEN = process.env.STATERA_BOT_TOKEN;
-const DEFAULT_PREFIX = process.env.STATERA_DEFAULT_PREFIX;
+const DEFAULT_PREFIX = process.env.STATERA_DEFAULT_PREFIX || '$';
 const PROJECT_HOME_PAGE = 'https://github.com/a-h-i/progress-bot.git';
 const BOT_NAME = 'statera';
 const CAPITALIZED_BOT_NAME = BOT_NAME.replace(BOT_NAME[0], BOT_NAME[0].toUpperCase());
