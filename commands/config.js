@@ -35,7 +35,7 @@ class Config extends BaseCommand {
         const args = [
             {
                 name: '--list',
-                description: 'if present simply lists the current configuration',
+                description: '--list : if present simply lists the current configuration',
                 title: 'List configuration',
                 handler: Config.prototype.handleListSubCommand
             },
