@@ -59,14 +59,12 @@ class BaseCommand {
      * @returns {MessageEmbed} see {@link https://discord.js.org/#/docs/main/stable/class/MessageEmbed}
      */
     createHelpEmbed() {
-        const embed = new MessageEmbed();
-        embed.setTitle(`${this.name} command usage`).setColor(Config.EMBED_COLOR)
-            .setThumbnail(Config.BOT_ICON_URL);
+        const embed = BaseCommand.createBaseEmbed();
+        embed.setTitle(`${this.name} command usage`);
         embed.setDescription(this.description);
         for (let argument of this.commandArguments) {
             embed.addField(argument.title, argument.description, false);
         }
-        embed.setTimestamp().setFooter(...Config.EMBED_FOOTER_ARGS);
         return embed;
     }
 
@@ -105,6 +103,18 @@ class BaseCommand {
     static extractUserIDFromMentionContent(content) {
         const match = content.match(USER_ID_REGEX);
         return match == null ? null : match.groups.id;
+    }
+
+    /**
+     * Creates a base embed, with footer, color, author, url and thumbnail.
+     * @returns {MessageEmbed}
+     */
+    static createBaseEmbed() {
+        const embed = new MessageEmbed();
+        embed.setColor(Config.EMBED_COLOR)
+            .setThumbnail(Config.BOT_ICON_URL).setURL(Config.PROJECT_HOME_PAGE).setAuthor(Config.CAPITALIZED_BOT_NAME);
+        embed.setTimestamp().setFooter(...Config.EMBED_FOOTER_ARGS);
+        return embed;
     }
 }
 

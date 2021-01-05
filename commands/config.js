@@ -1,7 +1,6 @@
 import { BaseCommand } from './base_command.js';
 import * as BotConfig from '../config/index.js';
 import { GuildConfig } from '../models/index.js';
-import { MessageEmbed } from 'discord.js';
 const logger = BotConfig.logger;
 
 const description = `Configure the bot for your own server.
@@ -499,10 +498,8 @@ ${formulaStr}`);
      * @param {Models.GuildConfig} guildConfig 
      */
     async handleListSubCommand(message, guildConfig) {
-        const configEmbed = new MessageEmbed();
+        const configEmbed = BaseCommand.createBaseEmbed();
         configEmbed.setTitle('Current Guild Settings');
-        configEmbed.setThumbnail(BotConfig.BOT_ICON_URL);
-        configEmbed.setAuthor(BotConfig.CAPITALIZED_BOT_NAME, BotConfig.BOT_ICON_URL, BotConfig.PROJECT_HOME_PAGE);
         const startingValueField = {
             name: 'Prefix and Starting Values',
             inline: false
@@ -549,9 +546,6 @@ Retirement level: ${guildConfig.retirementKeepLevel}`;
         }
 
         configEmbed.addFields(...fields);
-        configEmbed.setTimestamp();
-        configEmbed.setFooter(...BotConfig.EMBED_FOOTER_ARGS);
-        configEmbed.setColor(BotConfig.EMBED_COLOR);
         return message.reply(configEmbed);
     }
 
