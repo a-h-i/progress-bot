@@ -48,4 +48,5 @@ The following environment variables are used by the application.
 |STATERA_DB_PASSWORD| Database user password|
 |STATERA_DB_USERNAME| Database user defaults to statera_dev unless in production env|
 |STATERA_DB_NAME| Database name|
+
 The program will autoload a .env file in the working directory at startup.
