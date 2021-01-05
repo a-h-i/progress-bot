@@ -26,4 +26,5 @@ client.login(Config.BOT_TOKEN).then((userid) => logger.info(`Bot logged in with 
     (err) => {
         logger.error('Bot failed to login');
         logger.error(err);
+        process.exit(1);
     });
