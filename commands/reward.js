@@ -80,7 +80,9 @@ class RewardCommand extends BaseCommand {
             const rewardedCharactersLines = characters.map((character) => `<@${character.userId}> ${character.name}`).join('\n');
             const prompt = `Please reply with yes to confirm rewarding ${parsedValues.rewardedGold} gold and ${parsedValues.rewardedXp} experience to:
 ${rewardedCharactersLines}`;
-            const promptMessage = await message.reply(prompt);
+            const promptMessage = await message.reply(prompt, {
+                allowedMentions: { users: [ message.author.id ] }
+            });
             const filter = (reply) => reply.author.id == message.author.id;
             const collected = await message.channel.awaitMessages(filter, {
                 max: 1,
