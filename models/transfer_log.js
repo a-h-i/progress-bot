@@ -23,7 +23,6 @@ class TransferLog extends Sequelize.Model {
                 type: Sequelize.DataTypes.STRING(64),
                 allowNull: false,
                 field: 'guild_id',
-                primaryKey: true,
                 onDelete: 'CASCADE',
                 onUpdate: 'CASCADE',
                 references: {
