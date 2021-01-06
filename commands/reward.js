@@ -57,7 +57,9 @@ class RewardCommand extends BaseCommand {
             for (let characterIndex = 0 ; characterIndex < characters.length; characterIndex++) {
                 if (characters[characterIndex] == null) {
                     await transaction.rollback();
-                    return message.reply(`Could not find character ${parsedValues.userIdCharacterNameTuples[characterIndex][1]} for user <@${parsedValues.userIdCharacterNameTuples[characterIndex[0]]}>`);
+                    return message.reply(`Could not find character ${parsedValues.userIdCharacterNameTuples[characterIndex][1]} for user <@${parsedValues.userIdCharacterNameTuples[characterIndex][0]}>`, {
+                        allowedMentions: { users: [ message.author.id ] }
+                    });
                 }
             }
             const characterLevels = characters.map((character) => character.level);
@@ -151,8 +153,8 @@ ${rewardedCharactersLines}`;
      */
     static parseArguments(input) {
         const parsedValues = {
-            rewardedXp: NaN,
-            rewardedGold: NaN,
+            rewardedXp: 0,
+            rewardedGold: 0,
             extraValue: 0,
             userIdCharacterNameTuples: [],
             ok: true
@@ -252,8 +254,9 @@ ${rewardedCharactersLines}`;
                 parserState.accumulator.join(' ') ]);
             parserState.done = true;
         }
-        parsedValues.ok = parsedValues.ok & parserState.done;
-        parsedValues.ok = !(isNaN(parsedValues.rewardedGold) || isNaN(parsedValues.rewardedXp) || isNaN(parsedValues.extraValue));
+        
+        parsedValues.ok = parsedValues.ok && parserState.done;
+        parsedValues.ok = parsedValues.ok && !(isNaN(parsedValues.rewardedGold) || isNaN(parsedValues.rewardedXp) || isNaN(parsedValues.extraValue));
         parsedValues.userIdCharacterNameTuples = parsedValues.userIdCharacterNameTuples.map((tuple) => {
             return [ tuple[0], BaseCommand.removeLeadingAndTrailingQuoutes(tuple[1]) ];
         });
