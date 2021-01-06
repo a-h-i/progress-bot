@@ -108,6 +108,21 @@ class DMReward extends Sequelize.Model {
 
         Object.assign(this.computedValues, newComputedValue);
         this.changed('computedValues', true);
+        this.pruneComputedValues();
+    }
+
+    pruneComputedValues() {
+        const keysToDelete = [];
+        for (const key in this.computedValues) {
+            const value = this.computedValues[key];
+            if (value == 0 || value == undefined || value == null) {
+                keysToDelete.push(key);
+            }
+        }
+        if (keysToDelete.length > 0)  {
+            keysToDelete.forEach((key) => delete this.computedValues[key]);
+            this.changed('computedValues', true);
+        }
     }
 
     
@@ -159,6 +174,7 @@ class DMReward extends Sequelize.Model {
         }
 
         this.changed('computedValues', true);
+        this.pruneComputedValues();
         return true;
     }
 }

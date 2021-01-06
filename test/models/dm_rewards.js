@@ -155,21 +155,19 @@ describe('DMReward', function() {
 
         it('Should properly compute for multiple values', function() {
             const amount = 100;
-            const expectedBonusXpValue = 0;
             const expectedXpValue = 50;
             dmReward.consume(amount, [ 'bonusXp', 'xp' ]).should.be.true;
             dmReward.computedValues.xp.should.equal(expectedXpValue);
-            dmReward.computedValues.bonusXp.should.equal(expectedBonusXpValue);
+            dmReward.computedValues.should.not.have.all.keys('bonusXp');
             dmReward.computedValues.gold.should.equal(goldStartValue);
         });
 
         it('Should ignore non existant variables', function() {
             const amount = 100;
-            const expectedBonusXpValue = 0;
             const expectedXpValue = 50;
             dmReward.consume(amount, [ 'bonusXp', 'other', 'xp' ]).should.be.true;
             dmReward.computedValues.xp.should.equal(expectedXpValue);
-            dmReward.computedValues.bonusXp.should.equal(expectedBonusXpValue);
+            dmReward.computedValues.should.not.have.all.keys('bonusXp');
             dmReward.computedValues.gold.should.equal(goldStartValue);
             dmReward.computedValues.should.not.have.any.keys('other');
         });
