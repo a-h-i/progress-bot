@@ -1,6 +1,7 @@
 import { BaseCommand } from './base_command.js';
 import { DMReward, Character, sequelize, Sequelize } from '../models/index.js';
 import { logger } from '../config/index.js';
+import { listRewards } from '../helpers/index.js';
 
 const description = `Consume dm rewards.
 Usage: dmreward poolName amount(xp|gold) Your Character Name To be Rewarded
@@ -36,7 +37,7 @@ class DMRewardCommand extends BaseCommand {
             if (message.argsArray.length == 0) {
             // list
                 commit = false;
-                return message.reply(this.listRewardsHelper(dmReward));
+                return message.reply(listRewards(message.member, guildConfig, dmReward));
             }
 
             if (message.argsArray.length <= 2) {
@@ -65,7 +66,7 @@ ${poolStr}`);
             const covered = dmReward.consume(amount, poolVars);
             if (!covered) {
                 commit = false;
-                return message.reply(`You do not have enough rewards\n${this.listRewardsHelper(dmReward)}`);
+                return message.reply(`You do not have enough rewards\n${listRewards(message.member, guildConfig, dmReward)}`);
             }
             await dmReward.save({ transaction: transaction });
             const character = await Character.findOne({
@@ -90,7 +91,7 @@ ${poolStr}`);
             }
             await character.save({ transaction: transaction });
             commit = true;
-            return message.reply(`Remaining ${this.listRewardsHelper(dmReward)}`);
+            return message.reply(`Remaining\n${listRewards(message.member, guildConfig, dmReward)}`);
         } catch (err) {
             logger.error('Error while processing DMRewardCommand');
             logger.error(err);
@@ -107,12 +108,10 @@ ${poolStr}`);
     }
 
     noRewardsReplyHelper(message) {
-        return message.reply('You do not have any DM rewards yet.');
+        return message.reply('No DM rewards yet.');
     }
 
-    listRewardsHelper(dmReward) {
-        return `Rewards\n${dmReward.displayRewardsTable()}`;
-    }
+   
     /**
      * 
      * @param {string} amountStr  inform of <number>(xp|gold)

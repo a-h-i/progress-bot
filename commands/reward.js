@@ -1,5 +1,7 @@
 import { BaseCommand } from './base_command.js';
 import { Character, DMReward, sequelize, Sequelize } from '../models/index.js';
+import { listRewards } from '../helpers/index.js';
+
 import * as BotConfig from '../config/index.js';
 
 const description = `Reward a user or display your dm rewards or someone elses
@@ -121,10 +123,11 @@ ${rewardedCharactersLines}`;
                 userId: member.id
             }
         });
+
         if (dmReward == null) {
             return message.reply(`No rewards yet for ${member.displayName}`);
         } else {
-            return message.reply(`${member.displayName} Rewards\n${dmReward.displayRewardsTable()}`);
+            return message.reply(listRewards(member, guildConfig, dmReward));
         }
     }
 

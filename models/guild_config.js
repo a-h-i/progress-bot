@@ -240,6 +240,11 @@ class GuildConfig extends Sequelize.Model {
         }
     }
 
+    /**
+     * 
+     * @param {string} name
+     * @returns {string[]} null if no pool  
+     */
     getRewardPoolVars(name) {
         if (this.hasRewardPool(name)) {
             return this.rewardPools[name];
@@ -264,6 +269,13 @@ class GuildConfig extends Sequelize.Model {
     addRewardPool(poolName, vars) {
         this.rewardPools[poolName] = Array.from(vars);
         this.changed('rewardPools', true);
+    }
+
+    /**
+     * @returns {string[]}
+     */
+    getRewardPoolNames() {
+        return Object.getOwnPropertyNames(this.rewardPools);
     }
 
     rewardPoolsToString() {

@@ -177,6 +177,21 @@ class DMReward extends Sequelize.Model {
         this.pruneComputedValues();
         return true;
     }
+
+    /**
+     * 
+     * @param {string[]} variables 
+     * @returns {number} zero on non existant pool names
+     */
+    getValue(variables) {
+        return variables.reduce(( acc, variableName) => {
+            if (this.computedValues.hasOwnProperty(variableName)) {
+                return acc + this.computedValues[variableName];
+            } else {
+                return acc;
+            }
+        }, 0);
+    }
 }
 
 export { DMReward };

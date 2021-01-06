@@ -17,7 +17,7 @@ class ListCharacters extends BaseCommand {
     async execute(message, guildConfig) {
         let users = Array.from(message.mentions.users.values());
         if (users.length == 0) {
-            users = [ message.author ];
+            users.push(message.author);
         }
 
         const characters = await Character.findAll({
