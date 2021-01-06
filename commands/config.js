@@ -619,7 +619,9 @@ Retirement level: ${guildConfig.retirementKeepLevel}`;
 
     listRolesHelper(message, getRoleIds) {
         const roles = getRoleIds().map((id) => message.guild.roles.cache.get(id));
-        return message.reply(`Current Roles\n${roles.join(', ')}`);
+        return message.reply(`Current Roles\n${roles.join(', ')}`, {
+            allowedMentions: { roles: [] }
+        });
     }
 
     handleListCharacterCreationRoles(message, guildConfig) {
