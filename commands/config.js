@@ -144,14 +144,14 @@ class Config extends BaseCommand {
                 handler: Config.prototype.handleListRewardPoolsSubCommand
             },
             {
-                name: '--reward-pool-remove',
-                description: '--reward-pool-remove poolName',
+                name: '--reward-pools-remove',
+                description: '--reward-pools-remove poolName',
                 title: 'Remove reward pool',
                 handler: Config.prototype.handleRemoveRewardPoolSubCommand
             },
             {
-                name: '--reward-pool-add',
-                description: '--reward-pool-add poolName bonusXp xp',
+                name: '--reward-pools-add',
+                description: '--reward-pools-add poolName bonusXp xp',
                 title: 'Add reward pool',
                 handler: Config.prototype.handleAddRewardPoolSubCommand
             }
