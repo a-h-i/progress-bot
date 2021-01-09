@@ -8,6 +8,7 @@ export { RewardCommand } from './reward.js';
 export { SpendCommand } from './spend.js';
 export { TransferCommand } from './transfer.js';
 export { DMRewardCommand } from './dm_reward.js';
+export { AuctionCommand } from './auction.js';
 export { BaseCommand } from './base_command.js';
 
 import { Config } from './config.js';
@@ -20,10 +21,11 @@ import { RewardCommand } from './reward.js';
 import { SpendCommand } from './spend.js';
 import { TransferCommand } from './transfer.js';
 import { DMRewardCommand } from './dm_reward.js';
+import { AuctionCommand } from './auction.js';
 
 const commandClasses = [ Config, Help, Register, ListCharacters, SwitchCharacter,
     RetireCharacter, RewardCommand, SpendCommand, TransferCommand,
-    DMRewardCommand ];
+    DMRewardCommand, AuctionCommand ];
 
 export { commandClasses };
 export { CommandHandler } from './handler.js';

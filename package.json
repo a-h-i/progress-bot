@@ -28,9 +28,11 @@
     "dependencies": {
         "discord.js": "^12.5.1",
         "dotenv": "^8.2.0",
+        "luxon": "^1.25.0",
         "mathjs": "^8.1.0",
         "pg": "^8.5.1",
         "pg-hstore": "^2.3.3",
+        "redis": "^3.0.2",
         "sequelize": "^6.3.5",
         "sequelize-cli": "^6.2.0",
         "winston": "^3.3.3"
