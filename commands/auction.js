@@ -1,17 +1,21 @@
 import { BaseCommand } from './base_command.js';
-import { Auction } from '../models/index.js';
+import { Auction, Character } from '../models/index.js';
 import { displayAuctionShort } from '../helpers/index.js';
 
 const description = `Manage and bid on auction.
-
 `;
 class AuctionCommand extends BaseCommand {
     constructor() {
         const args = [
             {
                 name: 'list',
-                description: 'Lists currently active auctions',
+                description: 'Lists currently active auctions, guild wide',
                 handler: AuctionCommand.prototype.handleListAuctions
+            },
+            {
+                name: 'create',
+                description: 'Starts interactive auction creation mode',
+                handler: AuctionCommand.prototype.handleCreateAuction
             }
         ];
         args.forEach((arg) => {
@@ -43,6 +47,27 @@ class AuctionCommand extends BaseCommand {
         return message.reply(displayList, {
             allowedMentions: { users: [], roles: [] }
         });
+    }
+
+    async handleCreateAuction(message, guildConfig) {
+        const activeChar = await Character.getActiveCharacter(message.author.id, guildConfig.id);
+        if (activeChar == null) {
+            return message.reply('You do not currently have an active character.');
+        }
+        const auction = Auction.build(
+            {
+                guildId: guildConfig.id,
+                userId: message.author.id
+            }
+        );
+
+        const steps = [
+
+        ];
+        let success = true;
+        for (let i = 0; i < steps.length && success; i++) {
+            success = await Promise.resolve(steps[i].call(this, message, guildConfig, auction));
+        }
     }
 }
 

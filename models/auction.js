@@ -76,12 +76,14 @@ class Auction extends Sequelize.Model {
             isSold: {
                 field: 'is_sold',
                 type: Sequelize.DataTypes.BOOLEAN,
-                allowNull: false
+                allowNull: false,
+                defaultValue: false
             }, 
             isCanceled: {
                 field: 'is_canceled',
                 type: Sequelize.DataTypes.BOOLEAN,
-                allowNull: false
+                allowNull: false,
+                defaultValue: false
             }
         }, {
             sequelize,
