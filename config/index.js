@@ -15,6 +15,7 @@ const REWARD_POOLS_WIKI_URL = 'https://github.com/a-h-i/progress-bot/wiki/DM-Rew
 const BOT_ICON_URL = process.env.STATERA_BOT_ICON_URL || 'https://i.imgur.com/IPjZGrv.png';
 const INTERACTIVE_DEFAULT_TIMEOUT = 30000;
 const MAX_PREFIX_LENGTH = 64;
+const MAX_INTERACTIVE_RETRY_COUNT = 3;
 /**
  * Must be one of {@link https://discord.js.org/#/docs/main/stable/typedef/ActivityType ActivityType}
  */
@@ -24,5 +25,5 @@ const BOT_PRESENCE_ACTIVITY_NAME = 'D&D';
 export { BOT_TOKEN, DEFAULT_PREFIX, PROJECT_HOME_PAGE, BOT_NAME, VERSION_STRING, EMBED_FOOTER_ARGS, CAPITALIZED_BOT_NAME,
     BOT_PRESENCE_ACTIVITY_TYPE, BOT_PRESENCE_ACTIVITY_NAME, EMBED_COLOR, ISSUES_URL,
     DM_REWARDS_WIKI_URL, BOT_ICON_URL, INTERACTIVE_DEFAULT_TIMEOUT, MAX_PREFIX_LENGTH,
-    REWARD_POOLS_WIKI_URL };
+    REWARD_POOLS_WIKI_URL, MAX_INTERACTIVE_RETRY_COUNT };
 export { logger } from './logging.js';

@@ -61,6 +61,9 @@ module.exports = {
         ],
         'no-prototype-builtins' : [
             'off'
+        ],
+        'no-constant-condition': [
+            'off'
         ]
     }
 };

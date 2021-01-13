@@ -26,7 +26,8 @@ class Auction extends Sequelize.Model {
             openingBidAmount: {
                 type: Sequelize.DataTypes.DOUBLE,
                 allowNull: false,
-                field: 'opening_bid_amount'
+                field: 'opening_bid_amount',
+                default: 1
             },
             instaBuyAmount: {
                 type: Sequelize.DataTypes.DOUBLE,
@@ -35,8 +36,9 @@ class Auction extends Sequelize.Model {
             },
             minimumIncrement: {
                 type: Sequelize.DataTypes.DOUBLE,
-                allowNull: true,
-                field: 'minimum_increment'
+                allowNull: false,
+                field: 'minimum_increment',
+                default: 1
             },
             guildId: {
                 type: Sequelize.DataTypes.STRING(64),
@@ -78,7 +80,7 @@ class Auction extends Sequelize.Model {
                 type: Sequelize.DataTypes.BOOLEAN,
                 allowNull: false,
                 defaultValue: false
-            }, 
+            },
             isCanceled: {
                 field: 'is_canceled',
                 type: Sequelize.DataTypes.BOOLEAN,
@@ -115,6 +117,73 @@ class Auction extends Sequelize.Model {
             }
         );
     }
+
+    /**
+     * 
+     * @param {string} title
+     * @returns {string[]} empty if valid 
+     */
+    static isValidTitle(title) {
+        const errors = [];
+        if (title.length < 4) {
+            errors.push('Must be at least 4 characters long');
+        }
+        return errors;
+    }
+
+    /**
+     * 
+     * @param {string} str 
+     * @returns {number} null if can not parse
+     */
+    static parseOpeningBidAmountStr(str) {
+        return parseFloat(str);
+    }
+
+    /**
+     * 
+     * @param {string} str 
+     * @returns {string[]} empty if valid
+     */
+    static isValidOpeningBidAmount(str) {
+        const errors = [];
+        const parsedValue = Auction.parseOpeningBidAmountStr(str);
+        if (isNaN(parsedValue)) {
+            errors.push(`${str} is not a valid number`);
+        }
+        if (parsedValue <= 0) {
+            errors.push(`Must be greater than zero`);
+        }
+        return errors;
+    }
+
+    /**
+     * 
+     * @param {string} str 
+     * @returns {string[]} empty if valid
+     */
+    static isValidMinimumIncrement(str) {
+        const errors = [];
+        const parsedValue = Auction.parseMinimumIncrement(str);
+        if (isNaN(parsedValue)) {
+            errors.push(`${str} is not a valid number`);
+        }
+        if (parsedValue <= 0) {
+            errors.push(`Must be greater than zero`);
+        }
+        return errors;
+    }
+
+    /**
+     * 
+     * @param {string} str
+     * @returns {number} null if can not parse 
+     */
+    static parseMinimumIncrement(str) {
+        return parseFloat(str);
+    }
 }
+
+Auction.TITLE_REQUIREMENTS = [ 'Must be at least 4 characters long' ];
 
 export { Auction };

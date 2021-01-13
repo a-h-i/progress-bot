@@ -7,8 +7,7 @@ const description = `Configure the bot for your own server.
 Call with no arguments for interactive mode.
 Note that arguments that use mentions can **not** be combined in the same message.
 `;
-// Max retry for valid input in interactive mode config.
-const MAX_RETRY_COUNT = 3;
+
 
 /**
  * configure the bot for your own server
@@ -289,7 +288,7 @@ Reply with s to skip this setting, keeping the current value.`;
                 await message.reply('Value must be between 1-20.');
                 retryCount++;
             }
-        } while (retryCount < MAX_RETRY_COUNT);
+        } while (retryCount < BotConfig.MAX_INTERACTIVE_RETRY_COUNT);
         // Max retry count reached and no valid value entered.
         await message.reply('Skipping setting.');
         return true;
@@ -333,7 +332,7 @@ Reply with s to skip this setting, keeping the current value.`;
                 await message.reply('Value must be between 1-20.');
                 retryCount++;
             }
-        } while (retryCount < MAX_RETRY_COUNT);
+        } while (retryCount < BotConfig.MAX_INTERACTIVE_RETRY_COUNT);
         // Max retry count reached and no valid value entered.
         await message.reply('Skipping setting.');
         return true;
@@ -374,7 +373,7 @@ Reply with s to skip this setting, keeping the current value.`;
                 await message.reply('Value must be valid positive decimal.');
                 retryCount++;
             }
-        } while (retryCount < MAX_RETRY_COUNT);
+        } while (retryCount < BotConfig.MAX_INTERACTIVE_RETRY_COUNT);
         // Max retry count reached and no valid value entered.
         await message.reply('Skipping setting.');
         return true;
