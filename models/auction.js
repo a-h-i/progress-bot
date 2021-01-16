@@ -27,7 +27,7 @@ class Auction extends Sequelize.Model {
                 type: Sequelize.DataTypes.DOUBLE,
                 allowNull: false,
                 field: 'opening_bid_amount',
-                default: 1
+                defaultValue: 1
             },
             instaBuyAmount: {
                 type: Sequelize.DataTypes.DOUBLE,
@@ -38,7 +38,7 @@ class Auction extends Sequelize.Model {
                 type: Sequelize.DataTypes.DOUBLE,
                 allowNull: false,
                 field: 'minimum_increment',
-                default: 1
+                defaultValue: 1
             },
             guildId: {
                 type: Sequelize.DataTypes.STRING(64),
@@ -99,6 +99,15 @@ class Auction extends Sequelize.Model {
             }
         });
     }
+
+    /**
+     * @returns {boolean}
+     */
+    hasBid() {
+        return this.bidAmount !== undefined && this.bidAmount !== null;
+    }
+
+
     /**
      * 
      * @param {string} guildId
@@ -116,6 +125,17 @@ class Auction extends Sequelize.Model {
                 transaction: transaction
             }
         );
+    }
+
+    static findUserAuctions(guildId, userId, transaction) {
+        return Auction.findAll({
+            where: {
+                guildId: guildId,
+                userId: userId,
+                isCanceled: false
+            },
+            transaction: transaction
+        });
     }
 
     /**

@@ -1,6 +1,6 @@
 import { BaseCommand } from './base_command.js';
 import { Auction, Character } from '../models/index.js';
-import { displayAuctionShort, authorIdFilterFactory } from '../helpers/index.js';
+import { displayAuctionList, authorIdFilterFactory, displayAuctionShort } from '../helpers/index.js';
 import * as BotConfig from '../config/index.js';
 
 const description = `Manage and bid on auction.
@@ -10,13 +10,21 @@ class AuctionCommand extends BaseCommand {
         const args = [
             {
                 name: 'list',
+                title: 'list',
                 description: 'Lists currently active auctions, guild wide',
                 handler: AuctionCommand.prototype.handleListAuctions
             },
             {
                 name: 'create',
+                title: 'create',
                 description: 'Starts interactive auction creation mode',
                 handler: AuctionCommand.prototype.handleCreateAuction
+            },
+            {
+                name: 'manage',
+                title: 'manage',
+                description: 'View and manage your auctions',
+                handler: AuctionCommand.prototype.handleManageAuctions
             }
         ];
         args.forEach((arg) => {
@@ -41,10 +49,19 @@ class AuctionCommand extends BaseCommand {
         return message.reply(this.createHelpEmbed());
     }
 
+    async handleManageAuctions(message, guildConfig) {
+        if (message.argsArray.length == 0) {
+            const auctions = await Auction.findUserAuctions(guildConfig.id, message.author.id);
+            const replyStr = auctions.length > 0 ? '\n' + displayAuctionList(auctions) : "You don't have any active auctions";
+            return message.reply(replyStr, {
+                allowedMentions: { users: [], roles: [] }
+            });
+        }
+    }
+
     async handleListAuctions(message, guildConfig) {
         const auctions = await Auction.findActiveAuctions(guildConfig.id);
-        auctions.sort((left, right) => left.createdAt - right.createdAt).reverse();
-        const displayList = auctions.map(displayAuctionShort).join('\n');
+        const displayList = auctions.length > 0 ? '\n' + displayAuctionList(auctions) : 'No currently active auctions';
         return message.reply(displayList, {
             allowedMentions: { users: [], roles: [] }
         });
@@ -58,7 +75,8 @@ class AuctionCommand extends BaseCommand {
         const auction = Auction.build(
             {
                 guildId: guildConfig.id,
-                userId: message.author.id
+                userId: message.author.id,
+                charName: activeChar.name
             }
         );
 
@@ -101,9 +119,9 @@ class AuctionCommand extends BaseCommand {
         const filter = authorIdFilterFactory(message.author.id);
         let retryCount = 0;
         while (retryCount < BotConfig.MAX_INTERACTIVE_RETRY_COUNT) {
-            const prompt = `${displayAuctionShort(auction)}
+            const prompt = `\n${displayAuctionShort(auction)}
 Operations:
-${steps.map((step, index) => `${index + 1} - ${step.name}`)}
+${steps.map((step, index) => `${index + 1} - ${step.name}`).join('\n')}
 ----------
 Reply with yes to confirm, no to cancel the operation or an operation number to change a value`;
             const promptMessage = await message.reply(prompt);
@@ -120,7 +138,7 @@ Reply with yes to confirm, no to cancel the operation or an operation number to 
             const contentLowerCase = content.toLowerCase();
             if (yesRegex.test(contentLowerCase)) {
                 await auction.save();
-                return message.reply(`Created:
+                return message.reply(`Created:\n
 ${displayAuctionShort(auction)}`, {
                     allowedMentions: {
                         users: [],
@@ -135,7 +153,7 @@ ${displayAuctionShort(auction)}`, {
                     await message.reply('Invalid input');
                     retryCount++;
                 } else {
-                    await Promise.resolve(steps[operationIndex - 1].call(this, message, auction, guildConfig));
+                    await Promise.resolve(steps[operationIndex - 1].handler.call(this, message, auction, guildConfig));
                 }
             }
         }
@@ -187,6 +205,7 @@ Reply with c to cancel ${auction.title? 'or s to skip.' : '.'}`;
                 }
             }
         }
+        return false;
     }
 
     async interactiveCreateOpeningBid(message, auction) {

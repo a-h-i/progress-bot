@@ -12,7 +12,7 @@ For help setting up and using the bot on your server check out [Our wiki](../../
 
 If you are interested on running statera-bot on your machine, or contributing to the project keep reading.
 
-Node version `v15.3.0`
+Node version `v15.6.0`
 
 
 ## Dependencies

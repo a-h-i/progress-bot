@@ -17,7 +17,7 @@ async function up(queryInterface) {
         guild_id varchar(64) NOT NULL REFERENCES guild_configs(id) ON UPDATE CASCADE ON DELETE CASCADE,
         user_id varchar(64) NOT NULL,
         bidder_user_id varchar(64),
-        bidder_char_name varchar(256) NOT NULL,
+        bidder_char_name varchar(256),
         character_name varchar(256) NOT NULL,
         title text NOT NULL,
         description text
