@@ -107,6 +107,29 @@ class Auction extends Sequelize.Model {
         return this.bidAmount !== undefined && this.bidAmount !== null;
     }
 
+    /**
+     * Does not check if is a valid bid.
+     * @param {number} amount 
+     * @param {Character} character bidder
+     * @returns {Promise<Auction>}
+     */
+    placeBid(amount, character, transaction) {
+        this.bidAt = Date.now();
+        this.bidAmount = amount;
+        this.bidderUserId = character.userId;
+        this.bidderCharName = character.name;
+        return this.save({ transaction: transaction });
+    }
+
+    /**
+     * Returns true if amount can be bid on auction.
+     * @param {number} amount bid amount
+     * @returns {boolean}
+     */
+    canBidAmount(amount) {
+        return (this.hasBid() ? this.bidAmount + this.minimumIncrement : this.openingBidAmount )  <= amount; 
+    }
+
 
     /**
      * 
@@ -196,11 +219,37 @@ class Auction extends Sequelize.Model {
 
     /**
      * 
+     * @param {string} id auction id
+     * @param {string} guildId guild id
+     * @returns {Promise<Auction>} null if not found
+     */
+    static async findByPk(id, guildId, options={}) {
+        const auction = await super.findByPk(id, options);
+        if (auction && auction.guildId == guildId) {
+            return auction;
+        } else {
+            return null;
+        }
+    }
+
+  
+
+    /**
+     * 
      * @param {string} str
      * @returns {number} null if can not parse 
      */
     static parseMinimumIncrement(str) {
         return parseFloat(str);
+    }
+
+    /**
+     * @param {string} auctionId 
+     * @param {string} userId owner id
+     * @param {string} guildId associated guild
+     */
+    static async delete(auctionId, userId, guildId) {
+        throw new Error("Not implemented");
     }
 }
 

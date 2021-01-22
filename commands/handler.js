@@ -48,6 +48,7 @@ class CommandHandler {
             }
         } catch (err) {
             logger.error('Error in handleMessage');
+            logger.error(`message: ${JSON.stringify(message)}`);
             logger.error(err);
             return message.reply(`Error handling your message, please report the circumstances on our issues page ${Config.ISSUES_URL}`);
         }

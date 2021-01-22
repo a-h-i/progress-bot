@@ -270,15 +270,16 @@ class Character extends Sequelize.Model {
      * @param {string} userId 
      * @param {string} guildId 
      * @param {Sequelize.Transaction} transaction 
-     * @returns {Promise} resolves to Character instance or null if no active character.
+     * @returns {Promise<Character>} resolves to Character instance or null if no active character.
      */
-    static getActiveCharacter(userId, guildId, transaction) {
+    static getActiveCharacter(userId, guildId, transaction, lock) {
         return Character.findOne({
             where: {
                 userId: userId,
                 guildId: guildId,
                 isActive: true
-            }, transaction: transaction
+            }, transaction: transaction,
+            lock: lock
         });
     }
 }

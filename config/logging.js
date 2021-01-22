@@ -7,7 +7,7 @@ const transports = [
 
 if (process.env.NODE_ENV === 'development') {
     transports.push(new winston.transports.Console({
-        level: 'info',
+        level: 'debug',
         format: winston.format.combine(
             winston.format.colorize(),
             winston.format.errors({ stack: true }),

@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon';
 
 /**
  * 
@@ -12,4 +13,14 @@ function mapToDisplayStr(map) {
     return lines.join('\n');
 }
 
-export { mapToDisplayStr };
+
+/**
+ * 
+ * @param {Date} date 
+ * @returns {string}
+ */
+function formatJSDate(date) {
+    return DateTime.fromJSDate(date).toFormat('ffff');
+}
+
+export { mapToDisplayStr, formatJSDate };

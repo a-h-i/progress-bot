@@ -1,9 +1,14 @@
 import { BaseCommand } from './base_command.js';
 import { Auction, Character } from '../models/index.js';
-import { displayAuctionList, authorIdFilterFactory, displayAuctionShort } from '../helpers/index.js';
+import { displayAuctionList, authorIdFilterFactory, displayAuctionShort, displayAuctionDetails, placeBid } from '../helpers/index.js';
 import * as BotConfig from '../config/index.js';
 
 const description = `Manage and bid on auction.
+To show auction by id: $auction #<auctionID>
+To list all auctions: $auction list
+To create an auction: $auction create
+To show your own auctions: $auction manage
+To delete your own auction by id: $auction delete #<id>
 `;
 class AuctionCommand extends BaseCommand {
     constructor() {
@@ -25,6 +30,12 @@ class AuctionCommand extends BaseCommand {
                 title: 'manage',
                 description: 'View and manage your auctions',
                 handler: AuctionCommand.prototype.handleManageAuctions
+            },
+            {
+                name: 'bid',
+                title: 'bid',
+                description: 'bid #<auction_id> <amount> : bid #456 400.5',
+                handler: AuctionCommand.prototype.handleBidAuction
             }
         ];
         args.forEach((arg) => {
@@ -33,30 +44,110 @@ class AuctionCommand extends BaseCommand {
             }
         });
         super('auction', description, args);
+        this.manageSubcommands = [
+            {
+                name: 'delete',
+                title: 'delete',
+                description: 'Deletes an auction',
+                handler: AuctionCommand.prototype.handleDeleteAuction
+            }
+        ];
     }
 
     async execute(message, guildConfig) {
         if (message.argsArray.length == 0) {
             return message.reply(this.createHelpEmbed());
         }
-        const subCommand = message.argsArray.shift().toLowerCase();
-        for (const arg of this.commandArguments) {
-            if (arg.name === subCommand) {
-                return await Promise.resolve(arg.handler.call(this, message, guildConfig));
+        try {
+            const subCommand = message.argsArray.shift().toLowerCase();
+            for (const arg of this.commandArguments) {
+                if (arg.name === subCommand) {
+                    return await Promise.resolve(arg.handler.call(this, message, guildConfig));
+                }
             }
+            //Show auction details by ID
+            const id = this.extractAuctionId(subCommand.substring(1).trim());
+            const auction = await Auction.findByPk(id, guildConfig.id);
+            if (auction) {
+                return message.reply(displayAuctionDetails(auction), {
+                    allowedMentions: { users: [], roles: [] }
+                });
+            } else {
+                // unknown sub command or not an auction id
+                return message.reply(this.createHelpEmbed());
+            }
+        } catch (err) {
+            BotConfig.logger.error('Error in AuctionCommand#execute');
+            BotConfig.logger.error(`Guild: ${JSON.stringify(guildConfig)}`);
+            throw err;
         }
-        // unknown sub command
-        return message.reply(this.createHelpEmbed());
+
+    }
+
+    async handleBidAuction(message, guildConfig) {
+        if (message.argsArray.length != 2) {
+            return message.reply('Must specify an auction id and an amount');
+        }
+        const auctionStr = message.argsArray.shift();
+        const auctionId = this.extractAuctionId(auctionStr);
+        const amountStr = message.argsArray.shift();
+        const amount = Math.abs(parseFloat(amountStr));
+        if (isNaN(amount)) {
+            return message.reply(`${amountStr} is not a valid bid amount`);
+        }
+        const errors = await placeBid(guildConfig.id, auctionId, message.author.id, amount);
+        if (errors.length == 0) {
+            return message.reply(`Succesfully bid ${amount} gold`);
+        } else {
+            return message.reply(`\n${errors.join('\n')}`);
+        }
+
+    }
+
+    /**
+     * #id format
+     * @param {string} str 
+     * @returns {string}
+     */
+    extractAuctionId(str) {
+        return str.substring(1).trim();
     }
 
     async handleManageAuctions(message, guildConfig) {
-        if (message.argsArray.length == 0) {
-            const auctions = await Auction.findUserAuctions(guildConfig.id, message.author.id);
-            const replyStr = auctions.length > 0 ? '\n' + displayAuctionList(auctions) : "You don't have any active auctions";
-            return message.reply(replyStr, {
-                allowedMentions: { users: [], roles: [] }
-            });
+        try {
+            if (message.argsArray.length == 0) {
+                const auctions = await Auction.findUserAuctions(guildConfig.id, message.author.id);
+                const replyStr = auctions.length > 0 ? '\n' + displayAuctionList(auctions) : "You don't have any active auctions";
+                return message.reply(replyStr, {
+                    allowedMentions: { users: [], roles: [] }
+                });
+            }
+            const subCommand = message.argsArray.shift().toLowerCase();
+            for (const command of this.manageSubcommands) {
+                if (command.name === subCommand) {
+                    return await Promise.resolve(command.handler.call(this, message, guildConfig));
+                }
+            }
+            return message.reply(this.createHelpEmbed());
+        } catch (err) {
+            BotConfig.logger.error('Error in handling manage auctions');
+            throw err;
         }
+    }
+    
+    /**
+     * 
+     * @param {Message} message 
+     * @param {GuildConfig} guildConfig 
+     * @returns {Promise}
+     */
+    handleDeleteAuction(message, guildConfig) {
+        const id = this.extractAuctionId(message.argsArray.shift());
+        return Auction.delete(id, message.author.id, guildConfig.id).then(() => message.reply('Auction deleted.')).catch((err) => {
+            BotConfig.logger.info(`Attempted to delete auction with id: ${id}, authorid ${message.author.id} guildId: ${guildConfig.id}
+            and failed with ${JSON.stringify(err)}`);
+            return message.reply('Unable to delete auction.');
+        });
     }
 
     async handleListAuctions(message, guildConfig) {
