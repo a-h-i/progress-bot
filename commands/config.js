@@ -12,18 +12,18 @@ Note that arguments that use mentions can **not** be combined in the same messag
 /**
  * configure the bot for your own server
  * call with no arguments for interactive mode
- * parameter should be prefixed by -- i.e config --prefix $ to set the bot prefix to the $ symbol
+ * parameter should be prefixed by  i.e config prefix $ to set the bot prefix to the $ symbol
  * arguments:
- * --list : If present simply lists the current configuration
- * --prefix  <string> : set the default prefix, call with no value to get the current prefix
- * --starting-level <number> : set the starting level for new characters, defaults to 1. Use with no value to get the current value.
- * --starting-gold <positive_real_number> : set the starting gold for new characters, defaults to 0. Use with no value to get the current value, accepts decimals.
- * --character-creation-add-roles <@Role1> <@Role2> ... <@Role3> : Allows the mentioned roles to use the create_char command.
- * --character-creation-list-roles : list the roles that can create characters
- * --character-creation-remove-roles  <@Role1> <@Role2> ... <@Role3> : Removes the mentioned roles from the list of allowed roles.
- * --reward-add-roles <@Role1> <@Role2> ... <@Role3> : Allows the mentioned roles use the reward command.
- * --reward-list-roles : list the roles that can reward characters with xp and gold
- * --reward-remove-roles <@Role1> <@Role2> ... <@Role3> : Removes the mentioned roles from the list 
+ * list : If present simply lists the current configuration
+ * prefix  <string> : set the default prefix, call with no value to get the current prefix
+ * starting-level <number> : set the starting level for new characters, defaults to 1. Use with no value to get the current value.
+ * starting-gold <positive_real_number> : set the starting gold for new characters, defaults to 0. Use with no value to get the current value, accepts decimals.
+ * character-creation-add-roles <@Role1> <@Role2> ... <@Role3> : Allows the mentioned roles to use the create_char command.
+ * character-creation-list-roles : list the roles that can create characters
+ * character-creation-remove-roles  <@Role1> <@Role2> ... <@Role3> : Removes the mentioned roles from the list of allowed roles.
+ * reward-add-roles <@Role1> <@Role2> ... <@Role3> : Allows the mentioned roles use the reward command.
+ * reward-list-roles : list the roles that can reward characters with xp and gold
+ * reward-remove-roles <@Role1> <@Role2> ... <@Role3> : Removes the mentioned roles from the list 
  *
  * Note: 
  * Arguments that use mentions can not be combined in the same message.
@@ -32,125 +32,125 @@ class Config extends BaseCommand {
     constructor() {
         const args = [
             {
-                name: '--list',
-                description: '--list : if present simply lists the current configuration',
+                name: 'list',
+                description: 'list : if present simply lists the current configuration',
                 title: 'List configuration',
                 handler: Config.prototype.handleListSubCommand
             },
             {
-                name: '--prefix',
-                description: '--prefix <string> : set the default prefix, call with no value to get the current prefix. Max length of 64',
+                name: 'prefix',
+                description: 'prefix <string> : set the default prefix, call with no value to get the current prefix. Max length of 64',
                 title: 'Bot prefix',
                 handler: Config.prototype.handlePrefixSubCommand
             },
             {
-                name: '--starting-level',
-                description: '--starting-level <number> : set the starting level for new characters, defaults to 1. Use with no value to get the current value. Must be in [1, 20] range',
+                name: 'starting-level',
+                description: 'starting-level <number> : set the starting level for new characters, defaults to 1. Use with no value to get the current value. Must be in [1, 20] range',
                 default_value: 1,
                 title: 'Character starting level',
                 handler: Config.prototype.handleStartingLevelSubCommand
             },
             {
-                name: '--starting-gold',
-                description: '--starting-gold <positive_real_number> : set the starting gold for new characters, defaults to 0. Use with no value to get the current value, accepts decimals.',
+                name: 'starting-gold',
+                description: 'starting-gold <positive_real_number> : set the starting gold for new characters, defaults to 0. Use with no value to get the current value, accepts decimals.',
                 default_value: 0,
                 title: 'Character starting gold',
                 handler: Config.prototype.handleStartingGoldSubCommand
             },
             {
-                name: '--character-creation-add-roles',
-                description: '--character-creation-add-roles <@Role1> <@Role2> ... <@Role3> : Allows the mentioned roles to use the create_char command.',
+                name: 'character-creation-add-roles',
+                description: 'character-creation-add-roles <@Role1> <@Role2> ... <@Role3> : Allows the mentioned roles to use the create_char command.',
                 title: 'Adding character creation role',
                 handler: Config.prototype.handleAddCharCreationRoles
             },
             {
-                name: '--character-creation-list-roles',
-                description: '--character-creation-list-roles : lists the roles that can create characters',
+                name: 'character-creation-list-roles',
+                description: 'character-creation-list-roles : lists the roles that can create characters',
                 title: 'List character creation roles',
                 handler: Config.prototype.handleListCharacterCreationRoles
             },
             {
-                name: '--character-creation-remove-roles',
-                description: '--character-creation-remove-roles <@Role1> <@Role2> ... <@Role3> : Removes the mentioned roles from the list of allowed roles.',
+                name: 'character-creation-remove-roles',
+                description: 'character-creation-remove-roles <@Role1> <@Role2> ... <@Role3> : Removes the mentioned roles from the list of allowed roles.',
                 title: 'Remove character creation roles',
                 handler: Config.prototype.handleRemoveCharCreationRoles
             },
             {
-                name: '--reward-add-roles',
-                description: '--reward-add-roles <@Role1> <@Role2> ... <@Role3> : Allows the mentioned roles use the reward command.',
+                name: 'reward-add-roles',
+                description: 'reward-add-roles <@Role1> <@Role2> ... <@Role3> : Allows the mentioned roles use the reward command.',
                 title: 'Reward Roles',
                 handler: Config.prototype.handleAddRewardRoles
             },
             {
-                name: '--reward-list-roles',
-                description: '--reward-list-roles : lists the roles that can reward characters with xp and gold',
+                name: 'reward-list-roles',
+                description: 'reward-list-roles : lists the roles that can reward characters with xp and gold',
                 title: 'List reward roles',
                 handler: Config.prototype.handleListRewardRoles
             },
             {
-                name: '--reward-remove-roles',
-                description: '--reward-remove-roles <@Role1> <@Role2> ... <@Role3> : Removes the mentioned roles from the list',
+                name: 'reward-remove-roles',
+                description: 'reward-remove-roles <@Role1> <@Role2> ... <@Role3> : Removes the mentioned roles from the list',
                 title: 'Remove reward roles',
                 handler: Config.prototype.handleRemoveRewardRoles
             },
             {
-                name: '--config-add-roles',
-                description: '--config-add-roles <@Role1> ... <@RoleN> : Allows the mentioned roles to change bot configuration',
+                name: 'config-add-roles',
+                description: 'config-add-roles <@Role1> ... <@RoleN> : Allows the mentioned roles to change bot configuration',
                 title: 'Config Roles',
                 handler: Config.prototype.handleAddConfigRoles
             },
             {
-                name: '--config-list-roles',
-                description: '--config-list-roles : List roles',
+                name: 'config-list-roles',
+                description: 'config-list-roles : List roles',
                 title: 'List config roles',
                 handler: Config.prototype.handleListConfigRoles
             },
             {
-                name: '--config-remove-roles',
-                description: '--config-remove-roles <@Role1> ... <@RoleN> : Remove roles',
+                name: 'config-remove-roles',
+                description: 'config-remove-roles <@Role1> ... <@RoleN> : Remove roles',
                 title: 'Config remove roles',
                 handler: Config.prototype.handleRemoveConfigRoles
                 
             },
             {
-                name: '--retirement-level',
-                description: '--retirement-level <number> : If a character is retired before it reaches this level, the character is deleted. Set to 1 if you want to keep all characters. Defaults to 20',
+                name: 'retirement-level',
+                description: 'retirement-level <number> : If a character is retired before it reaches this level, the character is deleted. Set to 1 if you want to keep all characters. Defaults to 20',
                 title: 'Retirement Level',
                 handler: Config.prototype.handleRetirementLevelSubCommand
             },
             {
-                name: '--reward-formulas-list', 
-                description: '--reward-reward-list : Lists reward formulas.',
+                name: 'reward-formulas-list', 
+                description: 'reward-reward-list : Lists reward formulas.',
                 title: 'List Formulas',
                 handler: Config.prototype.handleListRewardFormulasSubCommand 
             },
             {
-                name: '--reward-formulas-add',
-                description: '--reward-formulas-add variableName formula : adds a formula that resolves to variableName',
+                name: 'reward-formulas-add',
+                description: 'reward-formulas-add variableName formula : adds a formula that resolves to variableName',
                 title: 'Add Formula',
                 handler: Config.prototype.handleRewardFormulaAdd
             }, 
             {
-                name: '--reward-formulas-remove',
-                description: '--reward-formulas-remove variableName : Removes a formula that resolves to variable variableName.',
+                name: 'reward-formulas-remove',
+                description: 'reward-formulas-remove variableName : Removes a formula that resolves to variable variableName.',
                 title: 'Remove Formula',
                 handler: Config.prototype.handleRewardFormulaRemove
             },
             {
-                name: '--reward-pools-list',
-                description: '--reward-pools-list : Lists current reward pools',
+                name: 'reward-pools-list',
+                description: 'reward-pools-list : Lists current reward pools',
                 title: 'List pools',
                 handler: Config.prototype.handleListRewardPoolsSubCommand
             },
             {
-                name: '--reward-pools-remove',
-                description: '--reward-pools-remove poolName',
+                name: 'reward-pools-remove',
+                description: 'reward-pools-remove poolName',
                 title: 'Remove reward pool',
                 handler: Config.prototype.handleRemoveRewardPoolSubCommand
             },
             {
-                name: '--reward-pools-add',
-                description: '--reward-pools-add poolName bonusXp xp',
+                name: 'reward-pools-add',
+                description: 'reward-pools-add poolName bonusXp xp',
                 title: 'Add reward pool',
                 handler: Config.prototype.handleAddRewardPoolSubCommand
             }
