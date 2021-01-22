@@ -32,7 +32,7 @@ class Register extends BaseCommand {
             description: 'usage --gold 3000. Optional',
             title: 'Starting gold override'
         } ];
-        super('register', description, args);
+        super([ 'register' ], description, args);
     }
 
     async execute(message, guildConfig) {

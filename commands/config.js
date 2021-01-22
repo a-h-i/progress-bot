@@ -160,7 +160,7 @@ class Config extends BaseCommand {
                 arg.handler = (message) => message.reply('Feature not yet implemented.');
             }
         });
-        super('config', description, args);
+        super([ 'config' ], description, args);
     }
 
     async execute(message, guildConfig) {

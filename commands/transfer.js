@@ -9,7 +9,7 @@ To transfer money to yourself simply mention yourself instead of @OtherUser.`;
 
 class TransferCommand extends BaseCommand {
     constructor() {
-        super('transfer', description, []);
+        super([ 'transfer' ], description, []);
     }
 
     async execute(message, guildConfig) {

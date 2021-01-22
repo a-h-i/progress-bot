@@ -10,10 +10,11 @@ usage: switch Character Name`;
  */
 class SwitchCharacter extends BaseCommand {
     constructor() {
-        super('switch', description, []);
+        super([ 'switch', 'active' ], description, []);
     }
 
     async execute(message, guildConfig) {
+        // TODO: display currently active character if no arguments provided.
         if (message.argsArray.length < 1) {
             // no name specified
             return message.reply(this.createHelpEmbed());

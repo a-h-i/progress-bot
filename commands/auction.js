@@ -43,7 +43,7 @@ class AuctionCommand extends BaseCommand {
                 arg.handler = (message) => message.reply('Feature not yet implemented.');
             }
         });
-        super('auction', description, args);
+        super([ 'auction' ], description, args);
         this.manageSubcommands = [
             {
                 name: 'delete',

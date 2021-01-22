@@ -5,7 +5,7 @@ use help <command_name> to list help about a specific command`;
 
 class Help extends BaseCommand {
     constructor(){
-        super('help', description, []);
+        super([ 'help' ], description, []);
     }
     
 

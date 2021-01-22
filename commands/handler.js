@@ -60,6 +60,9 @@ class CommandHandler {
      */
     registerCommand(command) {
         this.commands.set(command.name, command);
+        for (const alias of command.aliases) {
+            this.commands.set(alias, command);
+        }
     }
 
 

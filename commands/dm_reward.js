@@ -13,7 +13,7 @@ Example:
 
 class DMRewardCommand extends BaseCommand {
     constructor() {
-        super('dmreward', description, []);
+        super([ 'dmreward' ], description, []);
     }
 
     async execute(message, guildConfig) {

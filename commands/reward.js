@@ -17,7 +17,7 @@ Note you can only list the rewards of one person at a time`;
  */
 class RewardCommand extends BaseCommand {
     constructor() {
-        super('reward', description, []);
+        super([ 'reward' ], description, []);
         
     }
 

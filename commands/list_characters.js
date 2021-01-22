@@ -11,7 +11,7 @@ usage: list [@User1 ... @UserN]`;
  */
 class ListCharacters extends BaseCommand {
     constructor() {
-        super('list', description, []);
+        super([ 'list', 'chars' ], description, []);
     }
 
     async execute(message, guildConfig) {

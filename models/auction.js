@@ -107,13 +107,15 @@ class Auction extends Sequelize.Model {
         return this.bidAmount !== undefined && this.bidAmount !== null;
     }
 
+
     /**
      * Does not check if is a valid bid.
      * @param {number} amount 
      * @param {Character} character bidder
      * @returns {Promise<Auction>}
      */
-    placeBid(amount, character, transaction) {
+    async placeBid(amount, character, transaction) {
+        
         this.bidAt = Date.now();
         this.bidAmount = amount;
         this.bidderUserId = character.userId;

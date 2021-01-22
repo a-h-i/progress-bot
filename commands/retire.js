@@ -12,7 +12,7 @@ usage: retire Character Name
  */
 class RetireCharacter extends BaseCommand {
     constructor() {
-        super('retire', description, []);
+        super([ 'retire' ], description, []);
     }
 
     async execute(message, guildConfig) {

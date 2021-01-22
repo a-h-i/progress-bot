@@ -15,7 +15,7 @@ const USER_ID_REGEX = /<@!?(?<id>\d+)>/;
 class BaseCommand {
     /**
      * 
-     * @param {string} name - the name / key of a command
+     * @param {string[]} name - the names / keys of a command. First item is considered primary name/key
      * @param {string} description - A user friendly short description of command functionality
      * @param {Object[]} commandArguments - Array of objects representing each argument accepted by the command.
      * 
@@ -25,11 +25,20 @@ class BaseCommand {
      * Note that due to rich embed limitations, commands should have no more than 20 possible arguments.
      * for displaying help info to users. Otherwise each subclass may store whatever it wants, such as argument handlers.
      */
-    constructor(name, description, commandArguments) {
-        this.name = name;
+    constructor(names, description, commandArguments) {
+        this.names = names;
         this.description = description;
         this.commandArguments = commandArguments;
     }
+
+    get name() {
+        return this.names[0];
+    }
+
+    get aliases() {
+        return this.names.slice(1);
+    }
+
     /**
      * Executes the command
      * @param {Message} message - discord js message object See {@link https://discord.js.org/#/docs/main/stable/class/Message}

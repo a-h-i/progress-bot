@@ -8,7 +8,7 @@ spends 300 gold and 4 silvers. The 'on potions' portion is an optional descripti
 
 class SpendCommand extends BaseCommand {
     constructor() {
-        super('spend', description, []);
+        super([ 'spend' ], description, []);
     }
 
     async execute(message, guildConfig) {
