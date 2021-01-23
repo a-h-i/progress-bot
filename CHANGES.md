@@ -1,0 +1,20 @@
+v1.1
+====
+- Improves config list subcommand documentation
+- Standarized message embed factory
+- Version number bumped
+- Transferlogs now keyed by id only and adds hash index on guild_id
+- Homepage is now github project page
+- Renames config reward-pool sub commands to reward-pools for consistency
+- Roles no longer pinged in config mentions
+- Players no longer pinged in reward confirmation
+- Gold and xp are now both optional in rewards
+- DM Reward values removed when they become zero
+- Reward and dmreward commands now list by pools
+- Interactive config retry limit is now a (deployment) configuration value
+- Upgraded node version to v15.6.0
+- Auction
+    - Creation
+    - Deletion
+    - Listing
+    - Show single
