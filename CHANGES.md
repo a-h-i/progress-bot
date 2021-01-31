@@ -18,3 +18,6 @@ v1.1
     - Deletion
     - Listing
     - Show single
+- Command aliases
+- switch command will now display user's currently active character if used with no parameters
+- adds char as alias for switch command
