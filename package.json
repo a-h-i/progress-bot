@@ -21,7 +21,7 @@
     "scripts": {
         "start": "NODE_ENV=production node app.js",
         "dev": "NODE_ENV=development node app.js",
-        "test": "NODE_ENV=test mocha test --recursive -r chai/register-should -r chai/register-expect --reporter spec"
+        "test": "NODE_ENV=test mocha test "
     },
     "contributors": [
         {
@@ -38,7 +38,8 @@
         "redis": "^3.0.2",
         "sequelize": "^6.3.5",
         "sequelize-cli": "^6.2.0",
-        "winston": "^3.3.3"
+        "winston": "^3.3.3",
+        "wtfnode": "^0.8.4"
     },
     "devDependencies": {
         "chai": "^4.2.0",
