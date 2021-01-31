@@ -1,6 +1,7 @@
 import { BaseCommand } from './base_command.js';
 import { Character } from '../models/index.js';
 import { logger } from '../config/index.js';
+import { displayCharDetails } from '../helpers/index.js';
 
 const description = `Register a new character for a user
 usage : register @User Character Name
@@ -113,7 +114,7 @@ class Register extends BaseCommand {
         const char =  await Character.registerNewCharacter(guildConfig.id, userId,
             charName, startingXp, startingGold);
         
-        return message.reply('Created:\n' + char.toString());
+        return message.reply('Created:\n' + displayCharDetails(char));
 
     }
 }

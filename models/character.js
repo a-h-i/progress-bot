@@ -260,11 +260,7 @@ class Character extends Sequelize.Model {
         return this.level;
         
     }
-
-    toString() {
-        return `${this.name} Level: ${this.level} Experience: ${this.experience} Gold: ${this.gold} ${this.isActive? '- **Active**' : ''} ${this.isRetired? '- **Retired**' : ''}`;
-    }
-
+    
     /**
      * 
      * @param {string} userId 
