@@ -78,6 +78,48 @@ describe('RegisterCommand', function() {
 
     });
 
+    describe('With unauthorized author', function () {
+        let scenario;
+        let charOwner;
+        const charName = 'Jackson';
+        before(async function() {
+            const guild = clientMock.firstGuild();
+            scenario = clientMock.createScenario(guild);
+            charOwner = clientMock.firstGuild().members.cache.get(otherUserIds[0]);
+            scenario.queueMessage(new MessageMock(clientMock, scenario, clientMock.firstGuild().members.cache.get(otherUserIds[1]), [ '$register', charOwner, charName ]));
+            await scenario.run(); 
+        });
+
+        it('should create character with default values', async function() {
+            
+            scenario.hasReplies().should.be.true;
+            let count = await Character.count({
+                where: {
+                    guildId: guildId,
+                    userId: charOwner.id,
+                    name: charName
+                }
+            });
+            count.should.equal(0);
+        });
+
+        it('Should return unauthorized response', function() {
+            scenario.hasReplies().should.be.true;
+            const reply = scenario.popReply();
+            reply.content.should.contain('not allowed to use this command.');
+        });
+
+        after(async function() {
+            await Character.destroy({ where: {
+                guildId: guildId,
+                name: charName,
+                userId: charOwner.id
+            } });
+        });
+        
+
+    });
+
     after(async function() {
         await GuildConfig.destroy({ where: {
             id: guildId
