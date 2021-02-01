@@ -15,9 +15,11 @@ function displayAuctionShort(auction, seperator='\n') {
         tokens.push(`#${auction.id}`);
     }
     tokens.push(auction.title);
-    tokens.push(`Minimum Increment ${auction.minimumIncrement} Gold`);
+    tokens.push(`Minimum Increment: ${auction.minimumIncrement} Gold`);
     if (auction.hasBid()) {
         tokens.push(`Current bid: ${auction.bidAmount} Gold`);
+        tokens.push(`Bid by <@${auction.bidderUserId}> ${auction.bidderCharName}`);
+        tokens.push(`Bid made at ${formatJSDate(auction.bidAt)}`);
     } else if (auction.openingBidAmount > 0) {
         tokens.push(`No Bids. Starting at ${auction.openingBidAmount} Gold`);
     } else {
@@ -32,6 +34,7 @@ function displayAuctionShort(auction, seperator='\n') {
         const createdAtStr = formatJSDate(auction.createdAt);
         tokens.push(`Opened at ${createdAtStr}`);
     }
+    tokens.push(`Opened by <@${auction.userId}> ${auction.charName}`);
     tokens.push('----');
     return tokens.join(seperator);
 }
@@ -67,7 +70,7 @@ function placeBidCheckErrors(auctionId, userId, auction, character, amount, erro
         errors.push(`No auction found with id #${auctionId}.`);
     }
     if (character == null) {
-        errors.push(`User <@${userId} does not have a currently active character.`);
+        errors.push(`User <@${userId}> does not have a currently active character.`);
     }
     if (auction == null || character == null) {
         return;

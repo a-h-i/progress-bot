@@ -1,4 +1,5 @@
 import { Auction, Character, GuildConfig } from '../../models/index.js';
+import { displayAuctionShort, formatJSDate } from '../../helpers/index.js';
 import { v4 as uuidv4 } from 'uuid';
 
 describe('Auction', function() {
@@ -149,6 +150,95 @@ describe('Auction', function() {
             await GuildConfig.destroy({ where: {
                 id: guildId
                 
+            } });
+        });
+    });
+
+    describe('displayAuctionShort(auction, [seperator])', function() {
+        const guildId = uuidv4();
+        const ownerId = uuidv4();
+        const ownerCharName = 'Auction Owner';
+        const openingBidAmount = 1000;
+        const minimumIncrement = 10.5;
+        const bidAmount = openingBidAmount + minimumIncrement + 5;
+        let auction, bidder;
+        beforeEach(async function() {
+            const [ guildConfig ] = await GuildConfig.findOrCreate({
+                where: {
+                    id: guildId
+                }
+            });
+            await Character.registerNewCharacter(guildConfig.id, ownerId, ownerCharName, 
+                Character.getXpFromLevel(guildConfig.startingLevel), guildConfig.startingGold);
+            auction = await Auction.create({
+                openingBidAmount: openingBidAmount,
+                guildId: guildId,
+                userId: ownerId,
+                charName: ownerCharName,
+                title: 'Test Auction',
+                minimumIncrement: minimumIncrement
+            });
+            bidder = await Character.registerNewCharacter(guildConfig.id, uuidv4(), 'Other', Character.getXpFromLevel(guildConfig.startingLevel), 
+                bidAmount * 2);
+        });
+
+        it('should not have undefined fields', function() {
+            displayAuctionShort(auction).should.not.contain('undefined');
+        });
+        it('should not have null fields', function() {
+            displayAuctionShort(auction).should.not.contain('null');
+        });
+
+
+        it('should state auction id', function() {
+            displayAuctionShort(auction).should.contain(auction.id);
+        });
+
+        it('should contain title', function() {
+            displayAuctionShort(auction).should.contain(auction.title);
+        });
+        it('should state that there are no current bids', function() {
+            displayAuctionShort(auction).should.match(/no bids/i);
+        });
+        it('should state opened at date', function() {
+            const content = displayAuctionShort(auction);
+            content.should.match(/opened at/i);
+            content.should.contain(formatJSDate(auction.createdAt));
+        });
+
+        it('should state minimum increment', function() {
+            const content = displayAuctionShort(auction);
+            content.should.contain(auction.minimumIncrement);
+            content.should.match(/minimum increment/i);
+        });
+
+        it('should state opening bid', function() {
+            displayAuctionShort(auction).should.contain(auction.openingBidAmount);
+        });
+
+        it('should state owner info', function() {
+            const content = displayAuctionShort(auction);
+            content.should.contain(`<@${ownerId}>`);
+            content.should.contain(ownerCharName);
+        })
+
+        it('Should not say no bids if there is a bid', async function() {
+            await auction.placeBid(bidAmount, bidder);
+            displayAuctionShort(auction).should.not.match(/no bids/i);
+        });
+
+        it('should state bidder info', async function () {
+            await auction.placeBid(bidAmount, bidder);
+            const content = displayAuctionShort(auction);
+            content.should.contain(bidAmount);
+            content.should.match(/current bid/i);
+            content.should.contain(`<@${bidder.userId}>`);
+            content.should.contain(bidder.name);
+        });
+
+        afterEach(async function() {
+            await GuildConfig.destroy({ where: {
+                id: guildId         
             } });
         });
     });

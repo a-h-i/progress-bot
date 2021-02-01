@@ -110,6 +110,8 @@ class Auction extends Sequelize.Model {
 
     /**
      * Does not check if is a valid bid.
+     * Does not deduce gold from character.
+     * Only assigns identifying values to bid.
      * @param {number} amount 
      * @param {Character} character bidder
      * @returns {Promise<Auction>}
