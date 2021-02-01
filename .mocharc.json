@@ -6,5 +6,5 @@
     "ui": "bdd",
     "recursive": true,
     "require": ["chai/register-should", "chai/register-expect"],
-    "exclude": "test/mocjs/**/*.js"
+    "exclude": "test/mocks/**/*.js"
 }
