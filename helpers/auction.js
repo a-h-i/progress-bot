@@ -52,7 +52,6 @@ function displayAuctionList(auctions, seperator='\n') {
 
 
 function displayAuctionDetails(auction, seperator='\n') {
-    //TODO: Implement
     return displayAuctionShort(auction, seperator);
 } 
 
@@ -189,4 +188,4 @@ with arguments ${JSON.stringify(arguments)}`);
      
 } 
 
-export { displayAuctionShort, displayAuctionDetails, displayAuctionList, placeBid };
+export { displayAuctionShort, displayAuctionDetails, displayAuctionList, placeBid, releaseBidHold };

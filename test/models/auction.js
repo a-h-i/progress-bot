@@ -1,5 +1,5 @@
 import { Auction, Character, GuildConfig } from '../../models/index.js';
-import { displayAuctionShort, formatJSDate } from '../../helpers/index.js';
+import { displayAuctionShort, formatJSDate, placeBid, releaseBidHold } from '../../helpers/index.js';
 import { v4 as uuidv4 } from 'uuid';
 
 describe('Auction', function() {
@@ -220,7 +220,7 @@ describe('Auction', function() {
             const content = displayAuctionShort(auction);
             content.should.contain(`<@${ownerId}>`);
             content.should.contain(ownerCharName);
-        })
+        });
 
         it('Should not say no bids if there is a bid', async function() {
             await auction.placeBid(bidAmount, bidder);
@@ -239,6 +239,202 @@ describe('Auction', function() {
         afterEach(async function() {
             await GuildConfig.destroy({ where: {
                 id: guildId         
+            } });
+        });
+    });
+
+    describe('releaseBidHold(auction, [transaction])', function() {
+        const guildId = uuidv4();
+        const ownerId = uuidv4();
+        const ownerCharName = 'Auction Owner';
+        const openingBidAmount = 1000;
+        const minimumIncrement = 10.5;
+        const bidAmount = openingBidAmount + minimumIncrement + 5;
+        let auction, bidder;
+        beforeEach(async function() {
+            const [ guildConfig ] = await GuildConfig.findOrCreate({
+                where: {
+                    id: guildId
+                }
+            });
+            await Character.registerNewCharacter(guildConfig.id, ownerId, ownerCharName, 
+                Character.getXpFromLevel(guildConfig.startingLevel), guildConfig.startingGold);
+            auction = await Auction.create({
+                openingBidAmount: openingBidAmount,
+                guildId: guildId,
+                userId: ownerId,
+                charName: ownerCharName,
+                title: 'Test Auction',
+                minimumIncrement: minimumIncrement
+            });
+            bidder = await Character.registerNewCharacter(guildConfig.id, uuidv4(), 'Other', Character.getXpFromLevel(guildConfig.startingLevel), 
+                bidAmount * 2);
+            await auction.placeBid(bidAmount, bidder);
+        });
+
+        it('Should release held amount', async function() {
+            const prevGold = bidder.gold;
+            await releaseBidHold(auction);
+            await bidder.reload();
+            bidder.gold.should.equal(prevGold + bidAmount);
+        });
+        afterEach(async function() {
+            await GuildConfig.destroy({ where: {
+                id: guildId
+                
+            } });
+        });
+    });
+
+    describe("placeBid(guildId, auctionId, userId, amount)", function() {
+        const guildId = uuidv4();
+        const ownerId = uuidv4();
+        const ownerCharName = 'Auction Owner';
+        const openingBidAmount = 1000;
+        const minimumIncrement = 10.5;
+        const bidAmount = openingBidAmount + minimumIncrement + 5;
+        const bidderGold = bidAmount * 2;
+        let auction, bidder;
+        beforeEach(async function() {
+            const [ guildConfig ] = await GuildConfig.findOrCreate({
+                where: {
+                    id: guildId
+                }
+            });
+            await Character.registerNewCharacter(guildConfig.id, ownerId, ownerCharName, 
+                Character.getXpFromLevel(guildConfig.startingLevel), guildConfig.startingGold);
+            auction = await Auction.create({
+                openingBidAmount: openingBidAmount,
+                guildId: guildId,
+                userId: ownerId,
+                charName: ownerCharName,
+                title: 'Test Auction',
+                minimumIncrement: minimumIncrement
+            });
+            bidder = await Character.registerNewCharacter(guildConfig.id, uuidv4(), 'Other', Character.getXpFromLevel(guildConfig.startingLevel), 
+                bidderGold);
+        });
+
+        describe('No previous bids', function() {
+
+            it('Should handle no found auction error', async function() {
+                const badId = auction.id * 5;
+                const errors = await placeBid(guildId, badId, bidder.userId, bidAmount);
+                errors.length.should.equal(1);
+                errors[0].should.match(/no auction found/i);
+                errors[0].should.contain(badId);
+                await auction.reload();
+                auction.hasBid().should.be.false;
+                await bidder.reload();
+                bidder.gold.should.equal(bidderGold);
+
+            });
+
+            it('Should handle insufficient gold error', async function() {
+                const badAmount = bidder.gold + 1;
+                const errors = await placeBid(guildId, auction.id, bidder.userId, badAmount);
+                errors.length.should.equal(1);
+                errors[0].should.contain(`does not have ${badAmount} gold.`);
+                errors[0].should.contain(bidder.name);
+                await auction.reload();
+                auction.hasBid().should.be.false;
+                await bidder.reload();
+                bidder.gold.should.equal(bidderGold);
+            });
+
+            it('should handle amount < opening amount', async function() {
+                const badAmount = openingBidAmount - .5;
+                const errors = await placeBid(guildId, auction.id, bidder.userId, badAmount);
+                errors.length.should.equal(1);
+                errors[0].should.contain(openingBidAmount);
+                errors[0].should.match(/auction starts at/i);
+                await auction.reload();
+                auction.hasBid().should.be.false;
+                await bidder.reload();
+                bidder.gold.should.equal(bidderGold);
+            });
+
+            it('should handle no active character', async function() {
+                bidder.isActive = false;
+                await bidder.save();
+                const errors = await placeBid(guildId, auction.id, bidder.userId, bidAmount);
+                errors.length.should.equal(1);
+                errors[0].should.contain(`<@${bidder.userId}>`);
+                await auction.reload();
+                auction.hasBid().should.be.false;
+                await bidder.reload();
+                bidder.gold.should.equal(bidderGold);
+            });
+
+            it('Should correctly place bid', async function() {
+                const prev = Date.now();
+                const errors = await placeBid(guildId, auction.id, bidder.userId, bidAmount);
+                const after = Date.now();
+                await bidder.reload();
+                await auction.reload();
+                errors.length.should.equal(0);
+                auction.hasBid().should.be.true;
+                auction.bidAt.should.not.be.null;
+                auction.bidAt.getTime().should.be.within(prev, after);
+                auction.bidAmount.should.equal(bidAmount);
+                auction.bidderUserId.should.equal(bidder.userId);
+                auction.bidderCharName.should.equal(bidder.name);
+                bidder.gold.should.equal(bidderGold - bidAmount);
+            });
+        });
+
+        describe('With previous bid', function() {
+            const secondBidAmount = bidAmount + minimumIncrement;
+            const secondBidderGold = secondBidAmount * 1.5;
+            let secondBidder;
+            beforeEach(async function() {
+                secondBidder = await Character.registerNewCharacter(guildId, uuidv4(), 'Other 2', Character.getXpFromLevel(5), 
+                    secondBidderGold);
+                await placeBid(guildId, auction.id, bidder.userId, bidAmount);
+                await auction.reload();
+                await bidder.reload();
+            });
+
+            it('Should handle insuffecient bid amount', async function() {
+                const bidderGoldPre = bidder.gold;
+                const bidAtPre = auction.bidAt;
+                const errors = await placeBid(guildId, auction.id, secondBidder.userId, bidAmount + 0.5 * minimumIncrement);
+                await bidder.reload();
+                await auction.reload();
+                await secondBidder.reload();
+                errors.length.should.equal(1);
+                errors[0].should.contain(auction.bidAmount + auction.minimumIncrement);
+                auction.bidAmount.should.equal(bidAmount);
+                auction.hasBid().should.be.true;
+                auction.bidderUserId.should.equal(bidder.userId);
+                auction.bidderCharName.should.equal(bidder.name);
+                bidder.gold.should.equal(bidderGoldPre);
+                secondBidder.gold.should.equal(secondBidderGold);
+                auction.bidAt.getTime().should.equal(bidAtPre.getTime());
+            });
+
+            it('Should place correct bid', async function() {
+                const bidderGoldPre = bidder.gold;
+                const bidAtPre = auction.bidAt;
+                const errors = await placeBid(guildId, auction.id, secondBidder.userId, secondBidAmount);
+                await bidder.reload();
+                await auction.reload();
+                await secondBidder.reload();
+                errors.should.have.lengthOf(0);
+                bidder.gold.should.be.above(bidderGoldPre).and.equal(bidderGold);
+                auction.bidAt.should.be.above(bidAtPre);
+                auction.bidderUserId.should.equal(secondBidder.userId);
+                auction.bidderCharName.should.equal(secondBidder.name);
+                auction.bidAmount.should.equal(secondBidAmount);
+                auction.hasBid().should.be.true;
+                secondBidder.gold.should.equal(secondBidderGold - secondBidAmount);
+            });
+        });
+
+        afterEach(async function() {
+            await GuildConfig.destroy({ where: {
+                id: guildId
+                
             } });
         });
     });
