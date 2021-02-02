@@ -279,5 +279,6 @@ class Character extends Sequelize.Model {
         });
     }
 }
-
+Character.LEVEL_EXPERIENCE_SEQUENCE = LEVEL_EXPERIENCE_SEQUENCE;
+Character.MAX_XP = LEVEL_EXPERIENCE_SEQUENCE[LEVEL_EXPERIENCE_SEQUENCE.length - 1];
 export { Character };

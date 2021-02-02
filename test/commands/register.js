@@ -78,6 +78,52 @@ describe('RegisterCommand', function() {
 
     });
 
+    describe('$register @User 65000xp 900.45gold', function() {
+        let scenario;
+        let charOwner;
+        const customXp = 65000;
+        const customGold = 900.45;
+        const charName = 'Custom Values';
+        before(async function() {
+            const guild = clientMock.firstGuild();
+            scenario = clientMock.createScenario(guild);
+            charOwner = clientMock.firstGuild().members.cache.get(otherUserIds[0]);
+            scenario.queueMessage(new MessageMock(clientMock, scenario, author, [ '$register', charOwner, charName, `${customGold}gold`, `${customXp}xp` ]));
+            await scenario.run(); 
+        });
+
+        it('should create character with correct values', async function() {
+
+            scenario.hasReplies().should.be.true;
+            let count = await Character.count({
+                where: {
+                    guildId: guildId,
+                    userId: charOwner.id,
+                    isActive: true,
+                    name: charName,
+                    level: Character.getLevelFromXp(customXp),
+                    gold: customGold,
+                    experience: customXp
+                }
+            });
+            count.should.equal(1);
+        });
+
+        it('Reply should include character name', function() {
+            scenario.hasReplies().should.be.true;
+            const reply = scenario.popReply();
+            reply.content.should.contain(charName);
+        });
+
+        after(async function() {
+            await Character.destroy({ where: {
+                guildId: guildId,
+                name: charName,
+                userId: charOwner.id
+            } });
+        });
+    });
+
     describe('With unauthorized author', function () {
         let scenario;
         let charOwner;

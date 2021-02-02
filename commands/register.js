@@ -3,11 +3,14 @@ import { Character } from '../models/index.js';
 import { logger } from '../config/index.js';
 import { displayCharDetails } from '../helpers/index.js';
 
+const XP_REGEX = /(?<num>\d+)xp/i;
+const GOLD_REGEX = /(?<num>\d+(?:\.\d+)?)gold/i;
+
 const description = `Register a new character for a user
 usage : register @User Character Name
 A character will be created with character name for the mentioned user.
 To override the starting xp or gold use one or both of the flags as such
-register @User Character Name --xp 6400 --gold 500
+register @User Character Name 6400xp 500gold
 Note: character name can not start with -- or angle bracket < >
 `;
 
@@ -17,20 +20,20 @@ Note: character name can not start with -- or angle bracket < >
  * usage : register @User Character Name
  * A character will be created with character name for the mentioned user.
  * To override the starting xp or gold use one or both of the flags as such
- * register @User Character Name --xp 6400 --gold 500
+ * register @User Character Name 6400xp 500gold
  * Ignores leading and trailing double or single quotes on a character name.
  * Character name can not start with double dash.
  */
 class Register extends BaseCommand {
     constructor() {
         const args = [ {
-            name: '--xp',
-            description: 'usage --xp 500. Optional',
+            name: 'xp',
+            description: 'usage  500xp. Optional',
             title: 'starting xp override'
         }, 
         {
-            name: '--gold',
-            description: 'usage --gold 3000. Optional',
+            name: 'gold',
+            description: 'usage 3000gold. Optional',
             title: 'Starting gold override'
         } ];
         super([ 'register' ], description, args);
@@ -58,10 +61,11 @@ class Register extends BaseCommand {
                 // skip mention
                 continue;
             }
-
-            if (currentArg == '--xp') {
+            const xpMatch = currentArg.match(XP_REGEX);
+            const goldMatch = currentArg.match(GOLD_REGEX);
+            if (xpMatch != null) {
                 // Handle xp
-                const xpValueString = message.argsArray.shift();
+                const xpValueString = xpMatch.groups.num;
                 startingXp = parseInt(xpValueString, 10);
                 if (isNaN(startingXp)) {
                     // could not be parsed
@@ -69,9 +73,9 @@ class Register extends BaseCommand {
                     return message.reply('Could not parse xp value.');
                 }
 
-            } else if (currentArg == '--gold') {
+            } else if (goldMatch != null) {
                 // Handle gold
-                const goldValueString = message.argsArray.shift();
+                const goldValueString = goldMatch.groups.num;
                 startingGold = parseFloat(goldValueString);
                 if (isNaN(startingGold)) {
                     // could not be parsed
@@ -90,8 +94,8 @@ class Register extends BaseCommand {
             return message.reply(`Too much gold, max is ${Number.MAX_VALUE}`);
         }
 
-        if (startingXp == Infinity) {
-            return message.reply('Too much xp, max is 355000');
+        if (startingXp > Character.MAX_XP) {
+            return message.reply(`Too much xp, max is ${Character.MAX_XP}`);
         }
 
         // transform charname to string

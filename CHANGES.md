@@ -21,3 +21,4 @@ v1.1
 - Command aliases
 - switch command will now display user's currently active character if used with no parameters
 - adds char as alias for switch command
+- register command no longer uses double dash switch for arguments, $register @User Char Name 300gold 140xp
