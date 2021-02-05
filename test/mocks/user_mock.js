@@ -1,4 +1,7 @@
 import { RoleManagerMock } from "./role_manager_mock.js";
+import {Permissions} from 'discord.js';
+const DEFAULT_PERMS = [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.READ_MESSAGE_HISTORY, 
+Permissions.FLAGS.CHANGE_NICKNAME, Permissions.FLAGS.ADD_REACTIONS];
 
 class UserMock {
     
@@ -10,12 +13,19 @@ class UserMock {
                 this.property = data[property];
             }
         }
+        this.permissions = new Permissions(DEFAULT_PERMS)
+        
     }
 
 
-    hasPermission(tags, checkAdmin=false, checkOwner=false) {
-        return false;
+    hasPermission(tags, options) {
+        if(options.checkAdmin && this.permissions.has(Permissions.FLAGS.ADMINISTRATOR)) {
+            return true;
+        }
+        return this.permissions.has(tags)
     }
 }
+
+UserMock.Permissions = Permissions;
 
 export { UserMock };

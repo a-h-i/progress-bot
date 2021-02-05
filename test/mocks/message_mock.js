@@ -1,4 +1,4 @@
-import { Collection } from "discord.js";
+import { Collection, MessageEmbed } from "discord.js";
 import { RoleMock } from "./role_mock.js";
 import { UserMock } from "./user_mock.js";
 
@@ -16,6 +16,7 @@ class MessageMock {
             users: new Collection(),
             roles: new Collection()
         };
+        this.embeds = [];
         for (const token of tokens) {
             if (token instanceof UserMock) {
                 stringifiedTokens.push(`<@${token.id}>`);
@@ -23,6 +24,8 @@ class MessageMock {
             } else if (token instanceof RoleMock) {
                 stringifiedTokens.push(`<@&${token.id}`);
                 this.mentions.roles.set(token.id, token);
+            } else if (token instanceof MessageEmbed) {
+                this.embeds.push(token);
             } else {
                 stringifiedTokens.push(token);
             }

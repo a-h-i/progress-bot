@@ -1,4 +1,9 @@
 import { config as dotenvConfig } from 'dotenv';
+import * as path from 'path';
+
+if(process.env.NODE_ENV === 'test') {
+    dotenvConfig({path: path.resolve(process.cwd(), '.env.test')});
+}
 dotenvConfig();
 
 const BOT_TOKEN = process.env.STATERA_BOT_TOKEN;

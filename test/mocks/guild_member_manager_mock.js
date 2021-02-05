@@ -18,6 +18,14 @@ class GuildMemberManagerMock {
     create(user) {
         this.cache.set(user.id, user);     
     }
+
+    /**
+     * 
+     * @param {string} userId 
+     */
+    remove(userId) {
+       this.cache.delete(userId);
+    }
 }
 
 

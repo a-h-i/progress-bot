@@ -15,6 +15,11 @@ class ClientMock {
         this.guilds.set(guild.id, guild);
     }
 
+    /**
+     * 
+     * @param {GuildMock} guild 
+     * @returns {TestScenario}
+     */
     createScenario(guild) {
         return new TestScenario(this, guild);
     }
