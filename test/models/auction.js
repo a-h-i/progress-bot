@@ -1,5 +1,5 @@
 import { Auction, Character, GuildConfig } from '../../models/index.js';
-import { displayAuctionShort, formatJSDate, placeBid, releaseBidHold } from '../../helpers/index.js';
+import { deleteAuction, displayAuctionDetails, formatJSDate, placeBid, releaseBidHold } from '../../helpers/index.js';
 import { v4 as uuidv4 } from 'uuid';
 
 describe('Auction', function() {
@@ -154,7 +154,7 @@ describe('Auction', function() {
         });
     });
 
-    describe('displayAuctionShort(auction, [seperator])', function() {
+    describe('displayAuctionDetails(auction, [seperator])', function() {
         const guildId = uuidv4();
         const ownerId = uuidv4();
         const ownerCharName = 'Auction Owner';
@@ -183,53 +183,53 @@ describe('Auction', function() {
         });
 
         it('should not have undefined fields', function() {
-            displayAuctionShort(auction).should.not.contain('undefined');
+            displayAuctionDetails(auction).should.not.contain('undefined');
         });
         it('should not have null fields', function() {
-            displayAuctionShort(auction).should.not.contain('null');
+            displayAuctionDetails(auction).should.not.contain('null');
         });
 
 
         it('should state auction id', function() {
-            displayAuctionShort(auction).should.contain(auction.id);
+            displayAuctionDetails(auction).should.contain(auction.id);
         });
 
         it('should contain title', function() {
-            displayAuctionShort(auction).should.contain(auction.title);
+            displayAuctionDetails(auction).should.contain(auction.title);
         });
         it('should state that there are no current bids', function() {
-            displayAuctionShort(auction).should.match(/no bids/i);
+            displayAuctionDetails(auction).should.match(/no bids/i);
         });
         it('should state opened at date', function() {
-            const content = displayAuctionShort(auction);
+            const content = displayAuctionDetails(auction);
             content.should.match(/opened at/i);
             content.should.contain(formatJSDate(auction.createdAt));
         });
 
         it('should state minimum increment', function() {
-            const content = displayAuctionShort(auction);
+            const content = displayAuctionDetails(auction);
             content.should.contain(auction.minimumIncrement);
             content.should.match(/minimum increment/i);
         });
 
         it('should state opening bid', function() {
-            displayAuctionShort(auction).should.contain(auction.openingBidAmount);
+            displayAuctionDetails(auction).should.contain(auction.openingBidAmount);
         });
 
         it('should state owner info', function() {
-            const content = displayAuctionShort(auction);
+            const content = displayAuctionDetails(auction);
             content.should.contain(`<@${ownerId}>`);
             content.should.contain(ownerCharName);
         });
 
         it('Should not say no bids if there is a bid', async function() {
             await auction.placeBid(bidAmount, bidder);
-            displayAuctionShort(auction).should.not.match(/no bids/i);
+            displayAuctionDetails(auction).should.not.match(/no bids/i);
         });
 
         it('should state bidder info', async function () {
             await auction.placeBid(bidAmount, bidder);
-            const content = displayAuctionShort(auction);
+            const content = displayAuctionDetails(auction);
             content.should.contain(bidAmount);
             content.should.match(/current bid/i);
             content.should.contain(`<@${bidder.userId}>`);
@@ -269,7 +269,9 @@ describe('Auction', function() {
             });
             bidder = await Character.registerNewCharacter(guildConfig.id, uuidv4(), 'Other', Character.getXpFromLevel(guildConfig.startingLevel), 
                 bidAmount * 2);
-            await auction.placeBid(bidAmount, bidder);
+            await placeBid(guildId, auction.id, bidder.userId, bidAmount);
+            await bidder.reload();
+            await auction.reload();
         });
 
         it('Should release held amount', async function() {
@@ -437,5 +439,98 @@ describe('Auction', function() {
                 
             } });
         });
+    });
+
+    describe('deleteAuction(auctionId, guildId, userId, [transaction])', function() {
+        let auctionNoBid, auctionWithBid;
+        let bidder;
+        const bidderStartingGold = 5000;
+        const guildId = uuidv4();
+        const openingBidAmount = 1000;
+        const bidAmount = 2420.76;
+        let owner1, owner2;
+        beforeEach(async function() {
+            const [ guildConfig ] = await GuildConfig.findOrCreate({
+                where: {
+                    id: guildId
+                }
+            });
+            owner1 = await Character.registerNewCharacter(guildConfig.id, uuidv4(), "Name", 
+                Character.getXpFromLevel(guildConfig.startingLevel), guildConfig.startingGold);
+            owner2 = await Character.registerNewCharacter(guildConfig.id, uuidv4(), "Name", 
+            Character.getXpFromLevel(guildConfig.startingLevel), guildConfig.startingGold);
+            auctionNoBid = await Auction.create({
+                openingBidAmount: openingBidAmount,
+                guildId: guildId,
+                userId: owner1.userId,
+                charName: owner1.name,
+                title: 'Test Auction',
+            });
+            auctionWithBid = await Auction.create({
+                openingBidAmount: openingBidAmount,
+                guildId: guildId,
+                userId: owner2.userId,
+                charName: owner2.name,
+                title: 'Test Auction'
+            });
+            bidder = await Character.registerNewCharacter(guildConfig.id, uuidv4(), 'Other', Character.getXpFromLevel(guildConfig.startingLevel), 
+                bidderStartingGold);
+            await placeBid(guildId, auctionWithBid.id, bidder.userId, bidAmount);
+            await bidder.reload();
+            await auctionWithBid.reload();
+        });
+
+        it('Should delete auction', async function() { 
+            const owner1Gold = owner1.gold;
+            const deleted = await deleteAuction(auctionNoBid.id, guildId, auctionNoBid.userId);
+            deleted.should.be.instanceOf(Auction);
+            const count = await Auction.count({where: {
+                userId: auctionNoBid.userId
+            }});
+            count.should.equal(0);
+            const otherCount = await Auction.count({where: {
+                userId: auctionWithBid.userId
+            }});
+            otherCount.should.equal(1); 
+            await owner1.reload();
+            owner1.gold.should.equal(owner1Gold);
+        });
+
+        it('Should release held funds', async function() {
+            const owner2Gold = owner2.gold;
+            bidder.gold.should.equal(bidderStartingGold - bidAmount);
+            const deleted = await deleteAuction(auctionWithBid.id, guildId, auctionWithBid.userId);
+            deleted.should.be.instanceOf(Auction);
+            const count = await Auction.count({where: {
+                userId: auctionWithBid.userId
+            }});
+            count.should.equal(0);
+            const otherCount = await Auction.count({where: {
+                userId: auctionNoBid.userId
+            }});
+            otherCount.should.equal(1);
+            await bidder.reload();
+            bidder.gold.should.equal(bidderStartingGold);
+            await owner2.reload();
+            owner2.gold.should.equal(owner2Gold);
+        });
+
+        it('show an error if userid is not owner of auction', async function() {
+            const errors = await deleteAuction(auctionNoBid.id, guildId, auctionWithBid.userId);
+            const count = await Auction.count({where: {
+                userId: auctionWithBid.userId
+            }});
+            count.should.equal(1);
+            const otherCount = await Auction.count({where: {
+                userId: auctionNoBid.userId
+            }});
+            otherCount.should.equal(1);
+            errors.should.be.an('array').and.have.lengthOf(1);
+            errors[0].should.contain(`<@${auctionWithBid.userId}>`);
+        });
+
+        afterEach(async function() {
+            await GuildConfig.destroy({where: {id: guildId}});
+        })
     });
 });

@@ -107,7 +107,9 @@ class Auction extends Sequelize.Model {
         return this.bidAmount !== undefined && this.bidAmount !== null;
     }
 
-
+    hasInstaBuy() {
+        return this.instaBuyAmount !== null && this.instaBuyAmount !== undefined;
+    }
     /**
      * Does not check if is a valid bid.
      * Does not deduce gold from character.
@@ -247,14 +249,7 @@ class Auction extends Sequelize.Model {
         return parseFloat(str);
     }
 
-    /**
-     * @param {string} auctionId 
-     * @param {string} userId owner id
-     * @param {string} guildId associated guild
-     */
-    static async delete(auctionId, userId, guildId) {
-        throw new Error("Not implemented");
-    }
+   
 }
 
 Auction.TITLE_REQUIREMENTS = [ 'Must be at least 4 characters long' ];

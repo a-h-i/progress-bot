@@ -8,7 +8,41 @@ import * as BotConfig from '../config/index.js';
  * @param {string} [seperator] defaults to ' - '
  * @returns {string} 
  */
-function displayAuctionShort(auction, seperator='\n') {
+function displayAuctionShort(auction, seperator=' - ') {
+    const tokens = [];
+    if (auction.id !== undefined && auction.id !== null) {
+        tokens.push(`#${auction.id}`);
+    }
+    tokens.push(auction.title);
+    if (auction.isSold) {
+        tokens.push(`Sold to <@${auction.bidderUserId}> ${auction.bidderCharName}`);
+    } else if (auction.hasBid()) {
+        tokens.push(`Current bid: ${auction.bidAmount} Gold`);
+    } else if (auction.hasInstaBuy()) {
+        tokens.push(`Max bid amount ${auction.instaBuyAmount} Gold`);
+    } else {
+        tokens.push(`Starting at ${auction.openingBidAmount} Gold`);
+    }  
+    return tokens.join(seperator);
+}
+
+/**
+ * 
+ * @param {Auction[]} auctions 
+ * @param {string} [seperator] passed to Array.join defaults to new line
+ * @returns {string} seperator seperated mapping by displayAuctionShort and it's default seperator. Sorted by created ASC
+ */
+function displayAuctionList(auctions, seperator='\n') {
+    auctions.sort((left, right) => left.createdAt - right.createdAt).reverse();
+    return auctions.map((a) => displayAuctionShort(a)).join(seperator);
+}
+
+/**
+ * 
+ * @param {Auction} auction 
+ * @param {string} [seperator] defaults to newline
+ */
+function displayAuctionDetails(auction, seperator='\n') {
     const tokens = [];
     tokens.push('----');
     if (auction.id !== undefined && auction.id !== null) {
@@ -27,7 +61,7 @@ function displayAuctionShort(auction, seperator='\n') {
     }
     if (auction.isSold) {
         tokens.push(`Sold to <@${auction.bidderUserId}> ${auction.bidderCharName}`);
-    } else if (auction.instaBuyAmount !== null && auction.instaBuyAmount !== undefined) {
+    } else if (auction.hasInstaBuy()) {
         tokens.push(`Max bid amount ${auction.instaBuyAmount} Gold`);
     }
     if (auction.createdAt) {
@@ -37,22 +71,6 @@ function displayAuctionShort(auction, seperator='\n') {
     tokens.push(`Opened by <@${auction.userId}> ${auction.charName}`);
     tokens.push('----');
     return tokens.join(seperator);
-}
-
-/**
- * 
- * @param {Auction[]} auctions 
- * @param {string} [seperator] passed to Array.join defaults to new line
- * @returns {string} seperator seperated mapping by displayAuctionShort and it's default seperator. Sorted by created ASC
- */
-function displayAuctionList(auctions, seperator='\n') {
-    auctions.sort((left, right) => left.createdAt - right.createdAt).reverse();
-    return auctions.map((a) => displayAuctionShort(a)).join(seperator);
-}
-
-
-function displayAuctionDetails(auction, seperator='\n') {
-    return displayAuctionShort(auction, seperator);
 } 
 
 /**
@@ -89,7 +107,7 @@ function placeBidCheckErrors(auctionId, userId, auction, character, amount, erro
     }
 }
 /**
- * 
+ * Does nothing if auction has no bid
  * @param {Auction} auction 
  * @param {Sequelize.Transaction} transaction 
  * @returns {Promise}
@@ -186,6 +204,75 @@ with arguments ${JSON.stringify(arguments)}`);
     }
     return [ `Concurrency error with bid. If this persists please report an issue ${BotConfig.ISSUES_URL}` ];
      
-} 
+}
 
-export { displayAuctionShort, displayAuctionDetails, displayAuctionList, placeBid, releaseBidHold };
+/**
+ * 
+ * @param {string} auctionId 
+ * @param {string} guildId 
+ * @param {string} userId 
+ * @param {Sequelize.Transaction} transaction 
+ * @return {Promise<string[] | Auction>} auction if no errors;
+ */
+async function deleteAuctionTransaction(auctionId, guildId, userId, transaction=null) {
+    const errors = [];
+    
+    if (transaction == null) {
+        transaction = await sequelize.transaction({
+            isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE
+        });
+    }
+    try {
+        const auction = await Auction.findByPk(auctionId, guildId, { transaction: transaction,
+            lock: transaction.LOCK.UPDATE });
+        if (auction == null || auction.userId != userId) {
+            errors.push( `User <@${userId}> does not have an auction with id #${auctionId}` );
+        }
+        if (errors.length > 0) {
+            await transaction.rollback();
+            return errors;
+        }
+        await releaseBidHold(auction, transaction);
+        await auction.destroy({
+            transaction: transaction
+        });
+        await transaction.commit();
+        return auction;
+    } catch (err) {
+        await transaction.rollback();
+        throw err;
+    }
+
+}
+
+/**
+ * 
+ * @param {string} auctionId 
+ * @param {string} guildId 
+ * @param {string} userId auction owner
+ * @param {Sequelize.Transaction} transaction 
+ * @return {Promise<string[] | Auction>} auction if no errors;
+ * 
+ */
+async function deleteAuction(auctionId, guildId, userId, transaction=null) {
+
+    for (let retryCount = 0; retryCount < BotConfig.MAX_SERIALIZATION_TRANSACTION_RETY; retryCount++) {
+        try {
+            return await deleteAuctionTransaction(auctionId, guildId, userId, transaction);
+        }  catch (err) {
+            if (err != null && err != undefined && err.code === 40001 ) {
+                //serialization failure
+                BotConfig.logger.debug(`Serialization error in deleteAuction ${JSON.stringify(err)}
+with arguments ${JSON.stringify(arguments)}`);
+                continue; // simply retry up to MAX_SERIALIZATION_TRANSACTION_RETRY
+            } else {
+                BotConfig.logger.error(`Non serialization falure in deleteAuction ${JSON.stringify(err)}
+with arguments ${JSON.stringify(arguments)}`);
+                throw err;
+            }
+        }
+    }
+    return [ `Concurrency error with deletion. If this persists please report an issue ${BotConfig.ISSUES_URL}` ]; 
+}
+
+export { displayAuctionShort, displayAuctionDetails, displayAuctionList, placeBid, releaseBidHold, deleteAuction };

@@ -1,6 +1,6 @@
 import { BaseCommand } from './base_command.js';
 import { Auction, Character } from '../models/index.js';
-import { displayAuctionList, authorIdFilterFactory, displayAuctionShort, displayAuctionDetails, placeBid } from '../helpers/index.js';
+import { displayAuctionList, authorIdFilterFactory, displayAuctionDetails, placeBid } from '../helpers/index.js';
 import * as BotConfig from '../config/index.js';
 
 const description = `Manage and bid on auction.
@@ -210,7 +210,7 @@ class AuctionCommand extends BaseCommand {
         const filter = authorIdFilterFactory(message.author.id);
         let retryCount = 0;
         while (retryCount < BotConfig.MAX_INTERACTIVE_RETRY_COUNT) {
-            const prompt = `\n${displayAuctionShort(auction)}
+            const prompt = `\n${displayAuctionDetails(auction)}
 Operations:
 ${steps.map((step, index) => `${index + 1} - ${step.name}`).join('\n')}
 ----------
@@ -230,7 +230,7 @@ Reply with yes to confirm, no to cancel the operation or an operation number to 
             if (yesRegex.test(contentLowerCase)) {
                 await auction.save();
                 return message.reply(`Created:\n
-${displayAuctionShort(auction)}`, {
+${displayAuctionDetails(auction)}`, {
                     allowedMentions: {
                         users: [],
                         roles: []
