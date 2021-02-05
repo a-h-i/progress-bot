@@ -1,6 +1,6 @@
 import { BaseCommand } from './base_command.js';
 import { Auction, Character } from '../models/index.js';
-import { displayAuctionList, authorIdFilterFactory, displayAuctionDetails, placeBid } from '../helpers/index.js';
+import { displayAuctionList, authorIdFilterFactory, displayAuctionDetails, placeBid, deleteAuction, displayAuctionShort } from '../helpers/index.js';
 import * as BotConfig from '../config/index.js';
 
 const description = `Manage and bid on auction.
@@ -8,7 +8,7 @@ To show auction by id: $auction #<auctionID>
 To list all auctions: $auction list
 To create an auction: $auction create
 To show your own auctions: $auction manage
-To delete your own auction by id: $auction delete #<id>
+To delete your own auction by id: $auction manage delete #<id>
 `;
 class AuctionCommand extends BaseCommand {
     constructor() {
@@ -131,6 +131,7 @@ class AuctionCommand extends BaseCommand {
             return message.reply(this.createHelpEmbed());
         } catch (err) {
             BotConfig.logger.error('Error in handling manage auctions');
+            BotConfig.logger.error(JSON.stringify(err));
             throw err;
         }
     }
@@ -141,13 +142,20 @@ class AuctionCommand extends BaseCommand {
      * @param {GuildConfig} guildConfig 
      * @returns {Promise}
      */
-    handleDeleteAuction(message, guildConfig) {
+    async handleDeleteAuction(message, guildConfig) {
         const id = this.extractAuctionId(message.argsArray.shift());
-        return Auction.delete(id, message.author.id, guildConfig.id).then(() => message.reply('Auction deleted.')).catch((err) => {
-            BotConfig.logger.info(`Attempted to delete auction with id: ${id}, authorid ${message.author.id} guildId: ${guildConfig.id}
-            and failed with ${JSON.stringify(err)}`);
-            return message.reply('Unable to delete auction.');
-        });
+        const deleted = await deleteAuction(id, guildConfig.id, message.author.id);
+        if(Array.isArray(deleted)) {
+            // error
+            return message.reply(deleted.join('\n'), {
+                allowedMentions: { users: [], roles: [] }
+            });
+        } else {
+            return message.reply('\n**Deleted**:\n' + displayAuctionShort(auction), {
+                allowedMentions: { users: [], roles: [] }
+            });
+        }
+        
     }
 
     async handleListAuctions(message, guildConfig) {
