@@ -22,3 +22,5 @@ v1.1
 - switch command will now display user's currently active character if used with no parameters
 - adds char as alias for switch command
 - register command no longer uses double dash switch for arguments, $register @User Char Name 300gold 140xp
+- Config subcommands no longer use double dash switch for sub command name.
+- Improved error logging by including stack traces in JSON files
