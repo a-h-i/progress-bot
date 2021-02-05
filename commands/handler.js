@@ -1,6 +1,8 @@
 import { BaseCommand } from './base_command.js';
 import { GuildConfig } from '../models/index.js';
 import * as Config from '../config/index.js';
+import {serializeError} from 'serialize-error';
+
 const logger = Config.logger;
 /**
  * Handles executing commands and detecting guild configurations
@@ -49,7 +51,7 @@ class CommandHandler {
         } catch (err) {
             logger.error('Error in handleMessage');
             logger.error(`message: ${JSON.stringify(message)}`);
-            logger.error(err);
+            logger.error(serializeError(err));
             return message.reply(`Error handling your message, please report the circumstances on our issues page ${Config.ISSUES_URL}`);
         }
     }

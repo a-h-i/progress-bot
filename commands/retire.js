@@ -1,6 +1,7 @@
 import { BaseCommand } from './base_command.js';
 import { Character, sequelize } from '../models/index.js';
 import { logger, INTERACTIVE_DEFAULT_TIMEOUT } from '../config/index.js';
+import { serializeError } from 'serialize-error';
 
 const description = `Retire one of your characters by name.
 usage: retire Character Name
@@ -58,7 +59,7 @@ reply with anything else to cancel.`);
             }    
         } catch (err) {
             logger.error('Error in retire command execution');
-            logger.error(err);
+            logger.error(serializeError(err));
             await transaction.rollback();
             throw err;
         }

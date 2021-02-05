@@ -1,6 +1,7 @@
 import { BaseCommand } from './base_command.js';
 import { Character, sequelize, Sequelize, TransferLog } from '../models/index.js';
 import { logger } from '../config/index.js';
+import { serializeError } from 'serialize-error';
 
 const description = `Transfers money from your currently active character to another character.
 usage: transfer 300 @OtherUser Target Character Name
@@ -89,7 +90,7 @@ class TransferCommand extends BaseCommand {
             return message.reply(`Successfully transfered ${amount} gold.`);
         } catch (err) {
             logger.error('Error while processing transaction');
-            logger.error(err);
+            logger.error(serializeError(err));
             await transaction.rollback();
             throw err();
         }

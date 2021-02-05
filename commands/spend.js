@@ -1,6 +1,7 @@
 import { BaseCommand } from './base_command.js';
 import { Character, sequelize, Sequelize } from '../models/index.js';
 import { logger } from '../config/index.js';
+import { serializeError } from 'serialize-error';
 
 const description = `Spends gold from your currently active character's balance.
 Usage: spend 300.4 on potions
@@ -50,7 +51,7 @@ class SpendCommand extends BaseCommand {
         } catch (err) {
             await transaction.rollback();
             logger.error('Error executing spend command');
-            logger.error(err);
+            logger.error(serializeError(err));
             throw err;            
         }
     }

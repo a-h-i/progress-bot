@@ -2,6 +2,7 @@ import { BaseCommand } from './base_command.js';
 import { DMReward, Character, sequelize, Sequelize } from '../models/index.js';
 import { logger } from '../config/index.js';
 import { listRewards } from '../helpers/index.js';
+import {serializeError} from 'serialize-error';
 
 const description = `Consume dm rewards.
 Usage: dmreward poolName amount(xp|gold) Your Character Name To be Rewarded
@@ -94,7 +95,7 @@ ${poolStr}`);
             return message.reply(`Remaining\n${listRewards(message.member, guildConfig, dmReward)}`);
         } catch (err) {
             logger.error('Error while processing DMRewardCommand');
-            logger.error(err);
+            logger.error(serializeError(err));
             throw err;
         } finally {
             if (commit) {

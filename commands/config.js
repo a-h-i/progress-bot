@@ -1,6 +1,7 @@
 import { BaseCommand } from './base_command.js';
 import * as BotConfig from '../config/index.js';
 import { GuildConfig } from '../models/index.js';
+import { serializeError } from 'serialize-error';
 const logger = BotConfig.logger;
 
 const description = `Configure the bot for your own server.
@@ -210,7 +211,7 @@ class Config extends BaseCommand {
 
         } catch (err) {
             logger.error('Error handling interactive config');
-            logger.error(err);
+            logger.error(serializeError(err));
             throw err;
         }
         
@@ -509,25 +510,32 @@ Starting Gold: ${guildConfig.startingGold}
 Retirement level: ${guildConfig.retirementKeepLevel}`;
         
         const fields = [ startingValueField ];
-        const creationRoles = guildConfig.getCharCreationRoles().map((id) => message.guild.roles.cache.get(id)).join('\n');
-        fields.push({
-            name: 'Character Creation Roles',
-            inline: true,
-            value: creationRoles
-        });
-
-        const rewardRoles = guildConfig.getRewardRoles().map((id) => message.guild.roles.cache.get(id)).join('\n');
-        fields.push({
-            name: 'Reward Roles',
-            inline: true,
-            value: rewardRoles
-        });
-        const configRoles = guildConfig.getConfigRoles().map((id) => message.guild.roles.cache.get(id)).join('\n');
-        fields.push({
-            name: 'Configuration Roles',
-            inline: true,
-            value: configRoles
-        });
+        if(guildConfig.hasCreationRoles()) {
+            const creationRoles = guildConfig.getCharCreationRoles().map((id) => message.guild.roles.cache.get(id)).join('\n');
+            fields.push({
+                name: 'Character Creation Roles',
+                inline: true,
+                value: creationRoles.length
+            });
+        }
+        
+        if(guildConfig.hasRewardRoles()) {
+            const rewardRoles = guildConfig.getRewardRoles().map((id) => message.guild.roles.cache.get(id)).join('\n');
+            fields.push({
+                name: 'Reward Roles',
+                inline: true,
+                value: rewardRoles
+            });
+        }
+        if(guildConfig.hasConfigRoles()) {
+            const configRoles = guildConfig.getConfigRoles().map((id) => message.guild.roles.cache.get(id)).join('\n');
+            fields.push({
+                name: 'Configuration Roles',
+                inline: true,
+                value: configRoles
+            });
+        }
+        
 
         if (Object.getOwnPropertyNames(guildConfig.rewardFormulas).length != 0) {
             fields.push({

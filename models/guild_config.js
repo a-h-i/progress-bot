@@ -211,6 +211,35 @@ class GuildConfig extends Sequelize.Model {
     }
 
     /**
+     * 
+     * @param {string} attribute 
+     * @returns {boolean}
+     */
+    hasRolesHelper(attribute) {
+        return this.getRolesHelper(attribute).length > 0;
+    }
+
+    /**
+     * @returns {boolean}
+     */
+    hasCreationRoles() {
+        return this.hasRolesHelper('charCreationRoles');
+    }
+    /**
+     * @returns {boolean}
+     */
+    hasRewardRoles() {
+        return this.hasRolesHelper('rewardRoles');
+    }
+
+    /**
+     * @returns {boolean}
+     */
+    hasConfigRoles() {
+        return this.hasRolesHelper('configurationRoles');
+    }
+
+    /**
      * Creates and returns a new Map representing the config roles role => role.
      * for better lookup
      * @returns {Map}
@@ -252,6 +281,7 @@ class GuildConfig extends Sequelize.Model {
             return null;
         }
     }
+    
     /**
      * 
      * @param {string} name 

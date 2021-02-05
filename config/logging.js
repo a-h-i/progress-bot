@@ -7,12 +7,12 @@ const transports = [
 
 if (process.env.NODE_ENV === 'development') {
     transports.push(new winston.transports.Console({
-        level: 'debug',
+        level: 'info',
         format: winston.format.combine(
-            winston.format.colorize(),
             winston.format.errors({ stack: true }),
             winston.format.timestamp(),
-            winston.format.simple()
+            winston.format.json(),
+            winston.format.prettyPrint()
         ),
         handleExceptions: true
     }));
@@ -21,9 +21,10 @@ if (process.env.NODE_ENV === 'development') {
         format: winston.format.combine(
             winston.format.errors({ stack: true }),
             winston.format.timestamp(),
+            winston.format.json(),
             winston.format.prettyPrint()
         ),
-        filename: 'logs/statera_dev_logs',
+        filename: 'logs/statera_dev_logs.json',
         options: { flags: 'w' }
     }));
 }

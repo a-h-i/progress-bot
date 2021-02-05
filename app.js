@@ -1,6 +1,8 @@
 import * as Config from './config/index.js';
 import * as Discord from 'discord.js';
 import * as Command from './commands/index.js';
+import {serializeError} from 'serialize-error';
+
 const logger = Config.logger;
 
 const client = new Discord.Client({
@@ -25,6 +27,6 @@ client.on('message', client.commandsHandler.handleMessage.bind(client.commandsHa
 client.login(Config.BOT_TOKEN).then((userid) => logger.info(`Bot logged in with userid: ${userid}`),
     (err) => {
         logger.error('Bot failed to login');
-        logger.error(err);
+        logger.error(serializeError(err));
         process.exit(1);
     });

@@ -3,6 +3,7 @@ import { Character, DMReward, sequelize, Sequelize } from '../models/index.js';
 import { listRewards } from '../helpers/index.js';
 
 import * as BotConfig from '../config/index.js';
+import { serializeError } from 'serialize-error';
 
 const description = `Reward a user or display your dm rewards or someone elses
 To reward players use:
@@ -108,7 +109,7 @@ ${rewardedCharactersLines}`;
         } catch (err) {
             await transaction.rollback();
             BotConfig.logger.error('Error processing reward command');
-            BotConfig.logger.error(err);
+            BotConfig.logger.error(serializeError(err));
             throw err;
         }
        
