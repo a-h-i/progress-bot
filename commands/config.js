@@ -510,7 +510,7 @@ Starting Gold: ${guildConfig.startingGold}
 Retirement level: ${guildConfig.retirementKeepLevel}`;
         
         const fields = [ startingValueField ];
-        if(guildConfig.hasCreationRoles()) {
+        if (guildConfig.hasCreationRoles()) {
             const creationRoles = guildConfig.getCharCreationRoles().map((id) => message.guild.roles.cache.get(id)).join('\n');
             fields.push({
                 name: 'Character Creation Roles',
@@ -519,7 +519,7 @@ Retirement level: ${guildConfig.retirementKeepLevel}`;
             });
         }
         
-        if(guildConfig.hasRewardRoles()) {
+        if (guildConfig.hasRewardRoles()) {
             const rewardRoles = guildConfig.getRewardRoles().map((id) => message.guild.roles.cache.get(id)).join('\n');
             fields.push({
                 name: 'Reward Roles',
@@ -527,7 +527,7 @@ Retirement level: ${guildConfig.retirementKeepLevel}`;
                 value: rewardRoles
             });
         }
-        if(guildConfig.hasConfigRoles()) {
+        if (guildConfig.hasConfigRoles()) {
             const configRoles = guildConfig.getConfigRoles().map((id) => message.guild.roles.cache.get(id)).join('\n');
             fields.push({
                 name: 'Configuration Roles',

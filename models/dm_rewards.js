@@ -34,7 +34,7 @@ class DMReward extends Sequelize.Model {
         }, {
             sequelize,
             modelName: 'DMReward',
-            underscored: true,
+            underscored: true, 
             tableName: 'dm_rewards',
             timestamps: false,
             name: {

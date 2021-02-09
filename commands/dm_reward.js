@@ -2,7 +2,7 @@ import { BaseCommand } from './base_command.js';
 import { DMReward, Character, sequelize, Sequelize } from '../models/index.js';
 import { logger } from '../config/index.js';
 import { listRewards } from '../helpers/index.js';
-import {serializeError} from 'serialize-error';
+import { serializeError } from 'serialize-error';
 
 const description = `Consume dm rewards.
 Usage: dmreward poolName amount(xp|gold) Your Character Name To be Rewarded
@@ -10,6 +10,7 @@ Example:
     dmreward xp 400xp Ibnis Talba
     Attempts to reward 400 xp from the xp reward pool to your own character named Ibnis Talba
     Use dmreward without arguments to list your available DM rewards.
+    Note you can not use fractions for XP reward
 `;
 
 class DMRewardCommand extends BaseCommand {
@@ -119,14 +120,21 @@ ${poolStr}`);
      * @returns {[number, string]} string is one of xp or gold or null if failed. Number is always positive
      */
     static parseAmountStr(amountStr) {
-        const amountRegex = /^(?<digits>\d+)(?<type>\w+)$/;
-        const match = amountStr.match(amountRegex);
-        if (match == null) {
-            return [ 0, null ];
+        const xpRegex = /xp/ig;
+        const goldRegex = /gold/ig;
+        if (xpRegex.test(amountStr)) {
+            const amount = parseFloat(amountStr.replaceAll(xpRegex, ''));
+            if (!Number.isSafeInteger(amount)) {
+                return [ Math.abs(amount), null ];
+            }
+            return [ Math.abs(amount), 'xp' ];
+        } else if (goldRegex.test(amountStr)) {
+            const amount = parseFloat(amountStr.replaceAll(goldRegex, ''));
+            return [ Math.abs(amount), 'gold' ];
         }
-        const amount = parseFloat(match.groups.digits);
-        const type = match.groups.type;
-        return [ Math.abs(amount), type ];
+        
+        return [ 0, null ]; // failure
+        
     }
 }
 

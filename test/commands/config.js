@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { GuildConfig } from '../../models/index.js';
-import {ClientMock, GuildMock, MessageMock, UserMock, RoleMock} from '../mocks/index.js';
-import {MessageEmbed} from 'discord.js';
+import { ClientMock, GuildMock, MessageMock, UserMock } from '../mocks/index.js';
+import { MessageEmbed } from 'discord.js';
 
 describe('ConfigCommand', function() {
     let clientMock, guildMock;
@@ -23,7 +23,7 @@ describe('ConfigCommand', function() {
 
         it('Can display empty fields on default uncofigured guild', async function () {
             const scenario = clientMock.createScenario(guildMock);
-            scenario.queueMessage(new MessageMock(clientMock, scenario, author, ['$config list']))
+            scenario.queueMessage(new MessageMock(clientMock, scenario, author, [ '$config list' ]));
             await scenario.run();
             scenario.hasReplies().should.be.true;
             const reply = scenario.popReply().embeds[0];
@@ -32,7 +32,7 @@ describe('ConfigCommand', function() {
             reply.title.should.equal('Current Guild Settings');
             reply.title.should.not.match(/(undefined)|(null)/gi);
             expect(reply.description).to.be.null;
-            for(const field of reply.fields) {
+            for (const field of reply.fields) {
                 field.name.should.not.match(/(undefined)|(null)/gi);
                 field.value.should.not.match(/(undefined)|(null)/gi);
             }
@@ -45,6 +45,6 @@ describe('ConfigCommand', function() {
                     id: guildId
                 }
             });
-        })
+        });
     });
 });

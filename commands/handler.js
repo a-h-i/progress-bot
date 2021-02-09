@@ -1,7 +1,7 @@
 import { BaseCommand } from './base_command.js';
 import { GuildConfig } from '../models/index.js';
 import * as Config from '../config/index.js';
-import {serializeError} from 'serialize-error';
+import { serializeError } from 'serialize-error';
 
 const logger = Config.logger;
 /**

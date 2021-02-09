@@ -24,3 +24,4 @@ v1.1
 - register command no longer uses double dash switch for arguments, $register @User Char Name 300gold 140xp
 - Config subcommands no longer use double dash switch for sub command name.
 - Improved error logging by including stack traces in JSON files
+- DMReward command can now consume fractional gold.
