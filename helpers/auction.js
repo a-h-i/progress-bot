@@ -44,7 +44,6 @@ function displayAuctionList(auctions, seperator='\n') {
  */
 function displayAuctionDetails(auction, seperator='\n') {
     const tokens = [];
-    tokens.push('----');
     if (auction.id !== undefined && auction.id !== null) {
         tokens.push(`#${auction.id}`);
     }
@@ -69,7 +68,6 @@ function displayAuctionDetails(auction, seperator='\n') {
         tokens.push(`Opened at ${createdAtStr}`);
     }
     tokens.push(`Opened by <@${auction.userId}> ${auction.charName}`);
-    tokens.push('----');
     return tokens.join(seperator);
 } 
 

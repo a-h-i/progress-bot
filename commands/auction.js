@@ -221,6 +221,7 @@ class AuctionCommand extends BaseCommand {
         let retryCount = 0;
         while (retryCount < BotConfig.MAX_INTERACTIVE_RETRY_COUNT) {
             const prompt = `\n${displayAuctionDetails(auction)}
+-----------------
 Operations:
 ${steps.map((step, index) => `${index + 1} - ${step.name}`).join('\n')}
 ----------
@@ -313,7 +314,7 @@ Reply with c to cancel ${auction.title? 'or s to skip.' : '.'}`;
         const prompt = `Please enter an opening bid amount. skip to leave at ${auction.openingBidAmount} Gold
 Reply with c to cancel or s to skip`;
         const filter = authorIdFilterFactory(message.author.id);
-        while (true) {
+        for (let retryCount = 0; retryCount < BotConfig.MAX_INTERACTIVE_RETRY_COUNT; retryCount++) {
             const promptMessage = await message.reply(prompt);
             let collected = await message.channel.awaitMessages(filter, {
                 max: 1,
@@ -340,13 +341,14 @@ Reply with c to cancel or s to skip`;
                 }
             }
         }
+        return false;
     }
 
     async interactiveCreateMinimumIncrement(message, auction) {
         const prompt = `Please enter a minimum bid amount. skip to leave at ${auction.minimumIncrement} Gold
 Reply with c to cancel or s to skip`;
         const filter = authorIdFilterFactory(message.author.id);
-        while (true) {
+        for (let retryCount = 0; retryCount < BotConfig.MAX_INTERACTIVE_RETRY_COUNT; retryCount++) {
             const promptMessage = await message.reply(prompt);
             let collected = await message.channel.awaitMessages(filter, {
                 max: 1,
@@ -372,6 +374,7 @@ Reply with c to cancel or s to skip`;
                 }
             }
         }
+        return false;
     }
 }
 

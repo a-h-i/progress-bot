@@ -37,6 +37,65 @@ describe('AuctionCommand', function() {
 
     describe('$auction create', function() {
 
+        it('Creates an auction', async function() {
+            const owner = characters[0];
+            const preCreationCount = await Auction.count({
+                where: {
+                    guildId: guildConfig.id,
+                    userId: owner.userId
+                }
+            });
+            preCreationCount.should.equal(0);
+            const scenario = clientMock.createScenario(guildMock);
+            const author = guildMock.members.cache.get(owner.userId);
+            scenario.queueMessage(new MessageMock(clientMock, scenario, author, [ '$auction create' ]));
+
+            // Title message
+            const title = 'Interactive Auction Create test';
+            scenario.queueMessage(new MessageMock(clientMock, scenario, author, [ title ]));
+
+            // Opening bid message
+            const openingBidAmount = 1000;
+            scenario.queueMessage(new MessageMock(clientMock, scenario, author, [ openingBidAmount ]));
+            // Minimum increment message
+            const minimumIncrement = 50.5;
+            scenario.queueMessage(new MessageMock(clientMock, scenario, author, [ minimumIncrement ]));
+
+            // Confirm message 
+            scenario.queueMessage(new MessageMock(clientMock, scenario, author, [ 'yes' ]));
+
+            await scenario.run();
+            const postCreationCount = await Auction.count({
+                where: {
+                    guildId: guildConfig.id,
+                    userId: owner.userId
+                }
+            });
+
+            const auction = await Auction.findOne({
+                where: {
+                    guildId: guildConfig.id,
+                    userId: owner.userId
+                }
+            });
+
+            postCreationCount.should.equal(1);
+            auction.title.should.equal(title);
+            auction.minimumIncrement.should.equal(minimumIncrement);
+            auction.openingBidAmount.should.equal(openingBidAmount);
+            auction.charName.should.equal(owner.name);
+
+            // check replies
+            const replies = scenario.replies;
+            replies.should.have.lengthOf(5);
+            for (const { content } of replies) {
+                content.should.not.contain('undefined');
+                content.should.not.contain('null');
+            }
+            const lastReplyContent = replies[replies.length - 1].content;
+            lastReplyContent.should.match(/created/i);
+            lastReplyContent.should.contain(auction.id);
+        });
     });
 
     describe('$auction bid', function() {

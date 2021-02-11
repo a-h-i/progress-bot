@@ -1,7 +1,7 @@
 /**
  * Creates a function to check a message author's id vs an id.
  * @param {string} id - id to match against
- * @returns {function} 
+ * @returns {Function} 
  */
 function authorIdFilterFactory(id) {
     return function (reply) {
