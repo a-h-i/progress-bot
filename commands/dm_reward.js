@@ -38,8 +38,24 @@ class DMRewardCommand extends BaseCommand {
             }
             if (message.argsArray.length == 0) {
             // list
-                commit = false;
+                commit = true;
                 return message.reply(listRewards(message.member, guildConfig, dmReward));
+            }
+
+            if (message.argsArray.length == 1 && message.mentions.users.size == 1) {
+                const dm = message.mentions.users.first();
+                const otherReward = await DMReward.findOne({
+                    where: {
+                        guildId: guildConfig.id,
+                        userId: dm
+                    }, transaction: transaction
+                });
+                if (otherReward == null) {
+                    commit = false;
+                    return this.noRewardsReplyHelper(message);
+                }
+                commit = true;
+                return message.reply(listRewards(message.guild.members.cache.get(dm), guildConfig, otherReward));
             }
 
             if (message.argsArray.length <= 2) {

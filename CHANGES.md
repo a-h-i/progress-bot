@@ -25,3 +25,4 @@ v1.1
 - Config subcommands no longer use double dash switch for sub command name.
 - Improved error logging by including stack traces in JSON files
 - DMReward command can now consume fractional gold.
+- DMReward command can now list rewards of other users.
