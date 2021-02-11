@@ -515,7 +515,7 @@ Retirement level: ${guildConfig.retirementKeepLevel}`;
             fields.push({
                 name: 'Character Creation Roles',
                 inline: true,
-                value: creationRoles.length
+                value: creationRoles
             });
         }
         
