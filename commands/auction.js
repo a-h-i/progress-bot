@@ -56,12 +56,8 @@ class AuctionCommand extends BaseCommand {
     }
 
     async execute(message, guildConfig) {
-        // TODO: List active guild auctions when no arguments given
-        if (message.argsArray.length == 0) {
-            return message.reply(this.createHelpEmbed());
-        }
         try {
-            const subCommand = message.argsArray.shift().toLowerCase();
+            const subCommand = (message.argsArray.shift() || 'list').toLowerCase();
             for (const arg of this.commandArguments) {
                 if (arg.name === subCommand) {
                     return await Promise.resolve(arg.handler.call(this, message, guildConfig));
