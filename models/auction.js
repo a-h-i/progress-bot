@@ -80,12 +80,6 @@ class Auction extends Sequelize.Model {
                 type: Sequelize.DataTypes.BOOLEAN,
                 allowNull: false,
                 defaultValue: false
-            },
-            isCanceled: {
-                field: 'is_canceled',
-                type: Sequelize.DataTypes.BOOLEAN,
-                allowNull: false,
-                defaultValue: false
             }
         }, {
             sequelize,
@@ -148,8 +142,7 @@ class Auction extends Sequelize.Model {
             {
                 where: {
                     guildId: guildId,
-                    isSold: false,
-                    isCanceled: false
+                    isSold: false
                 },
                 transaction: transaction
             }
@@ -160,8 +153,7 @@ class Auction extends Sequelize.Model {
         return Auction.findAll({
             where: {
                 guildId: guildId,
-                userId: userId,
-                isCanceled: false
+                userId: userId
             },
             transaction: transaction
         });

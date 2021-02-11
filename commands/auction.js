@@ -5,6 +5,7 @@ import * as BotConfig from '../config/index.js';
 
 const description = `Manage and bid on auction.
 To show auction by id: $auction #<auctionID>
+To bid: $auction bid #<id> <amount>
 To list all auctions: $auction list
 To create an auction: $auction create
 To show your own auctions: $auction manage
@@ -55,6 +56,7 @@ class AuctionCommand extends BaseCommand {
     }
 
     async execute(message, guildConfig) {
+        // TODO: List active guild auctions when no arguments given
         if (message.argsArray.length == 0) {
             return message.reply(this.createHelpEmbed());
         }
@@ -66,7 +68,7 @@ class AuctionCommand extends BaseCommand {
                 }
             }
             //Show auction details by ID
-            const id = this.extractAuctionId(subCommand.substring(1).trim());
+            const id = this.extractAuctionId(subCommand);
             const auction = await Auction.findByPk(id, guildConfig.id);
             if (auction) {
                 return message.reply(displayAuctionDetails(auction), {
@@ -97,7 +99,7 @@ class AuctionCommand extends BaseCommand {
         }
         const errors = await placeBid(guildConfig.id, auctionId, message.author.id, amount);
         if (errors.length == 0) {
-            return message.reply(`Succesfully bid ${amount} gold`);
+            return message.reply(`Successfully bid ${amount} gold`);
         } else {
             return message.reply(`\n${errors.join('\n')}`);
         }
@@ -145,13 +147,13 @@ class AuctionCommand extends BaseCommand {
     async handleDeleteAuction(message, guildConfig) {
         const id = this.extractAuctionId(message.argsArray.shift());
         const deleted = await deleteAuction(id, guildConfig.id, message.author.id);
-        if(Array.isArray(deleted)) {
+        if (Array.isArray(deleted)) {
             // error
             return message.reply(deleted.join('\n'), {
                 allowedMentions: { users: [], roles: [] }
             });
         } else {
-            return message.reply('\n**Deleted**:\n' + displayAuctionShort(auction), {
+            return message.reply('\n**Deleted**:\n' + displayAuctionShort(deleted), {
                 allowedMentions: { users: [], roles: [] }
             });
         }

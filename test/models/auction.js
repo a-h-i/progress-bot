@@ -458,7 +458,7 @@ describe('Auction', function() {
             owner1 = await Character.registerNewCharacter(guildConfig.id, uuidv4(), "Name", 
                 Character.getXpFromLevel(guildConfig.startingLevel), guildConfig.startingGold);
             owner2 = await Character.registerNewCharacter(guildConfig.id, uuidv4(), "Name", 
-            Character.getXpFromLevel(guildConfig.startingLevel), guildConfig.startingGold);
+                Character.getXpFromLevel(guildConfig.startingLevel), guildConfig.startingGold);
             auctionNoBid = await Auction.create({
                 openingBidAmount: openingBidAmount,
                 guildId: guildId,
@@ -484,13 +484,13 @@ describe('Auction', function() {
             const owner1Gold = owner1.gold;
             const deleted = await deleteAuction(auctionNoBid.id, guildId, auctionNoBid.userId);
             deleted.should.be.instanceOf(Auction);
-            const count = await Auction.count({where: {
+            const count = await Auction.count({ where: {
                 userId: auctionNoBid.userId
-            }});
+            } });
             count.should.equal(0);
-            const otherCount = await Auction.count({where: {
+            const otherCount = await Auction.count({ where: {
                 userId: auctionWithBid.userId
-            }});
+            } });
             otherCount.should.equal(1); 
             await owner1.reload();
             owner1.gold.should.equal(owner1Gold);
@@ -501,13 +501,13 @@ describe('Auction', function() {
             bidder.gold.should.equal(bidderStartingGold - bidAmount);
             const deleted = await deleteAuction(auctionWithBid.id, guildId, auctionWithBid.userId);
             deleted.should.be.instanceOf(Auction);
-            const count = await Auction.count({where: {
+            const count = await Auction.count({ where: {
                 userId: auctionWithBid.userId
-            }});
+            } });
             count.should.equal(0);
-            const otherCount = await Auction.count({where: {
+            const otherCount = await Auction.count({ where: {
                 userId: auctionNoBid.userId
-            }});
+            } });
             otherCount.should.equal(1);
             await bidder.reload();
             bidder.gold.should.equal(bidderStartingGold);
@@ -517,20 +517,20 @@ describe('Auction', function() {
 
         it('show an error if userid is not owner of auction', async function() {
             const errors = await deleteAuction(auctionNoBid.id, guildId, auctionWithBid.userId);
-            const count = await Auction.count({where: {
+            const count = await Auction.count({ where: {
                 userId: auctionWithBid.userId
-            }});
+            } });
             count.should.equal(1);
-            const otherCount = await Auction.count({where: {
+            const otherCount = await Auction.count({ where: {
                 userId: auctionNoBid.userId
-            }});
+            } });
             otherCount.should.equal(1);
             errors.should.be.an('array').and.have.lengthOf(1);
             errors[0].should.contain(`<@${auctionWithBid.userId}>`);
         });
 
         afterEach(async function() {
-            await GuildConfig.destroy({where: {id: guildId}});
-        })
+            await GuildConfig.destroy({ where: { id: guildId } });
+        });
     });
 });

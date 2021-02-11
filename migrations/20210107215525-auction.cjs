@@ -13,7 +13,6 @@ async function up(queryInterface) {
         insta_buy_amount double precision,
         minimum_increment double precision NOT NULL DEFAULT 1,
         is_sold BOOLEAN NOT NULL DEFAULT FALSE,
-        is_canceled BOOLEAN NOT NULL DEFAULT FALSE,
         guild_id varchar(64) NOT NULL REFERENCES guild_configs(id) ON UPDATE CASCADE ON DELETE CASCADE,
         user_id varchar(64) NOT NULL,
         bidder_user_id varchar(64),

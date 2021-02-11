@@ -92,6 +92,9 @@ function placeBidCheckErrors(auctionId, userId, auction, character, amount, erro
     if (auction == null || character == null) {
         return;
     }
+    if (auction.userId == character.userId && auction.charName == character.name) {
+        errors.push(`Character ${character.name} can not bid on own auction`);
+    }
     if (character.gold < amount) {
         errors.push(`Character ${character.name} does not have ${amount} gold.`);
     }
