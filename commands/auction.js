@@ -57,7 +57,10 @@ class AuctionCommand extends BaseCommand {
 
     async execute(message, guildConfig) {
         try {
-            const subCommand = (message.argsArray.shift() || 'list').toLowerCase();
+            if (message.argsArray.length == 0) {
+                message.argsArray.push('list');
+            }
+            const subCommand = message.argsArray.shift().toLowerCase();
             for (const arg of this.commandArguments) {
                 if (arg.name === subCommand) {
                     return await Promise.resolve(arg.handler.call(this, message, guildConfig));

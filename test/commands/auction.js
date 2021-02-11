@@ -97,6 +97,80 @@ describe('AuctionCommand', function() {
             lastReplyContent.should.contain(auction.id);
         });
     });
+    describe('$auction list', function() {
+        const auctions = [];
+        beforeEach(async function() {
+            auctions.length = 0;
+            for (let i = 0; i < 10; i++) {
+                const owner = characters[i % characters.length];
+                auctions.push(await Auction.create({
+                    guildId: guildConfig.id,
+                    userId: owner.userId,
+                    charName: owner.name,
+                    title: `Test List Auction #${i}`,
+                    openingBidAmount: 1000,
+                    minimumIncrement: 100
+                }));
+            }
+        });
+        it('should list auctions', async function() {
+            const scenario = clientMock.createScenario(guildMock);
+            scenario.queueMessage(new MessageMock(clientMock, scenario, guildMock.members.cache.first(), [ '$auction list' ]));
+            await scenario.run();
+
+            const content = scenario.popReply().content;
+            content.should.not.contain('undefined');
+            content.should.not.contain('null');
+            auctions.forEach((a) => {
+                content.should.contain(a.id);
+            });
+        });
+        it('Should list as default', async function() {
+            const scenario = clientMock.createScenario(guildMock);
+            scenario.queueMessage(new MessageMock(clientMock, scenario, guildMock.members.cache.first(), [ '$auction' ]));
+            await scenario.run();
+
+            const content = scenario.popReply().content;
+            content.should.not.contain('undefined');
+            content.should.not.contain('null');
+            auctions.forEach((a) => {
+                content.should.contain(a.id);
+            });
+        });
+        afterEach(async function() {
+            await Promise.all(auctions.map((a) => a.destroy()));
+        });
+    });
+
+    describe('$auction #<id>', function() {
+        let auction;
+        beforeEach(async function() {
+            const owner = characters[1];
+            auction = await Auction.create({
+                guildId: guildConfig.id,
+                userId: owner.userId,
+                charName: owner.name,
+                title: 'Test Auction details',
+                openingBidAmount: 1000,
+                minimumIncrement: 100
+            });
+        });
+        it('Should show auction details', async function() {
+            const scenario = clientMock.createScenario(guildMock);
+            scenario.queueMessage(new MessageMock(clientMock, scenario, guildMock.members.cache.first(), [ '$auction', `#${auction.id}` ]));
+            await scenario.run();
+
+            const content = scenario.popReply().content;
+            content.should.not.contain('undefined');
+            content.should.not.contain('null');
+            content.should.contain(auction.id);
+        });
+        afterEach(async function() {
+            if (auction) {
+                await auction.destroy();
+            }
+        });
+    });
 
     describe('$auction bid', function() {
         let owner, bidder, auction;

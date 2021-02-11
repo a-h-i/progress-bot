@@ -24,7 +24,7 @@ class GuildMemberManagerMock {
      * @param {string} userId 
      */
     remove(userId) {
-       this.cache.delete(userId);
+        this.cache.delete(userId);
     }
 }
 
